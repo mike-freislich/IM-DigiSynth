@@ -1,0 +1,9 @@
+#ifndef DS_COLOR_H
+#define DS_COLOR_H
+
+#define COLOR_BORDER CL(50, 50, 200)
+#define COLOR_HEADING_FILL CL(50, 50, 200)
+#define COLOR_BACKGROUND 0
+#define COLOR_TOP_PANEL CL(100, 100, 200)
+
+#endif
