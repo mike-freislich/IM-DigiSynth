@@ -10,6 +10,8 @@
 #include "DSPatchManager.h"
 #include "DSLFO.h"
 #include "waveshaperTables.h"
+#include "PSDCO.h"
+#include "PSEnvelope.h"
 
 #define AMPLITUDE (1.0)
 
@@ -17,8 +19,8 @@ const uint8_t waves[] = {
     // WAVEFORM_SINE,
     // WAVEFORM_TRIANGLE,
     WAVEFORM_SAWTOOTH,
-    // WAVEFORM_SQUARE,
-    // WAVEFORM_PULSE
+     //WAVEFORM_SQUARE,
+    //WAVEFORM_PULSE
     // WAVEFORM_SAMPLE_HOLD
 };
 
@@ -116,17 +118,33 @@ public:
     DSLFO *pitchLFO;
     DSLFO *pitchLFO2;
 
+    PSDCO *dco1;
+
     PolySynth()
     {
-        AudioMemory(64);
+        AudioMemory(32);
 
-        // filterLFO = new DSLFO(WAVEFORM_SAMPLE_HOLD, 32, 0.2);
-        // filterLFO->addConnectionOut(&filter1modMixer, 1);
-        // filterLFO->addConnectionOut(&filter2modMixer, 1);
+
+        //filterLFO = new DSLFO(WAVEFORM_TRIANGLE, 0.05, 1.0);
+        //filterLFO->addConnectionOut(&filter1modMixer, 1);
+        //filterLFO->addConnectionOut(&filter2modMixer, 1);
 
         filterLFO2 = new DSLFO(WAVEFORM_TRIANGLE, 0.05, 1.0);
+        //filterLFO2 = new DSLFO(WAVEFORM_TRIANGLE, 36, 0.2);
         filterLFO2->addConnectionOut(&filter1modMixer, 2);
         filterLFO2->addConnectionOut(&filter2modMixer, 2);
+
+        filter1blockMixer.gain(0, 0);
+        filter1blockMixer.gain(1, 0);
+        filter1blockMixer.gain(2, 0);
+        filter1blockMixer.gain(3, 1);
+        filter2blockMixer.gain(0, 0);
+        filter2blockMixer.gain(1, 0);
+        filter2blockMixer.gain(2, 0);
+        filter2blockMixer.gain(3, 1);
+        HPFdc.amplitude(10);
+        hpf1.resonance(0);
+        hpf2.resonance(0);
 
         // pitchLFO = new DSLFO(WAVEFORM_SAMPLE_HOLD, 32, 0.005);
         // pitchLFO->addConnectionOut(&osc1modMixer, 0);
@@ -161,28 +179,37 @@ public:
         ladder2.resonance(0.8);
         voiceFENVdc.amplitude(1);
 
+        waveformLeft.phaseModulation(30);
+        waveformRight.phaseModulation(45);
+
         voiceAENVdc.amplitude(1);
         voicePENVdc.amplitude(1);
 
         voiceGainLeft.gain(1.0);
         voiceGainRight.gain(1.0);
 
-        _detune = 1.5;
+        _detune = 0.5;
 
         balance(0);
         pan(0, -1);
         pan(1, 1);
 
-        setWaveShaper(20);
+        waveshapePreAmp1.gain(1);
+        waveshapePreAmp2.gain(1);
+        setWaveShaper(29);
         initOscMixer();
         setNoise(NoiseType::noiseOff);
 
-        ringMod(0, 4000, WAVEFORM_SAMPLE_HOLD);
-        xmod(0, 0.0);
-        xmod(1, 0.0);
+        ringMod(0.2, 100, WAVEFORM_SINE);
+        xmod(0, 0.9);
+        xmod(1, 0.5);
 
         AudioProcessorUsageMaxReset();
         AudioMemoryUsageMaxReset();
+
+        dco1 = new PSDCO("DCO1", &AENV1, &filter1env, &osc1PENV);
+        //dco1->set(PSEnvelopeParam::PSP_ENV_AMOUNT, 0.0); 
+        //dco1->params[PSEnvelopeParam::PSP_ENV_AMOUNT]->value;        
     }
 
     ~PolySynth() {}
@@ -204,8 +231,8 @@ public:
         osc2_AEnv.env->noteOn();
         osc1_FEnv.env->noteOn();
         osc2_FEnv.env->noteOn();
-        //osc1_PEnv.env->noteOn();
-        //osc2_PEnv.env->noteOn();        
+        osc1_PEnv.env->noteOn();
+        osc2_PEnv.env->noteOn();        
         AudioInterrupts();
     }
 
@@ -232,12 +259,12 @@ public:
     {
         osc1waveMixer.gain(0, 0.5); // waveform osc1 left
         osc1waveMixer.gain(1, 1.0); // waveform osc1 post AM left
-        osc1waveMixer.gain(2, 0.3); // white noise left
-        osc1waveMixer.gain(3, 0.3); // pink noise left
+        osc1waveMixer.gain(2, 0.2); // white noise left
+        osc1waveMixer.gain(3, 0.2); // pink noise left
         osc2waveMixer.gain(0, 0.5); // waveform osc2 right
         osc2waveMixer.gain(1, 1.0); // waveform osc2 post AM left
-        osc2waveMixer.gain(2, 0.3); // white noise right
-        osc2waveMixer.gain(3, 0.3); // pink noise right
+        osc2waveMixer.gain(2, 0.2); // white noise right
+        osc2waveMixer.gain(3, 0.2); // pink noise right
     }
 
     enum NoiseType

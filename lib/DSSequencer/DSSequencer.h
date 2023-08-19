@@ -109,7 +109,7 @@ void testTracks()
 #define SEQ_GATE_MS 64
 #define SEQ_TRACKS 4
 #define SEQ_STEPS 16
-#define SEQ_TEMPO 30
+#define SEQ_TEMPO 72
 
 const float SeqDivValues[13] PROGMEM = {
     2.00000000f,
@@ -169,7 +169,7 @@ public:
             {
                 SeqStep *step = &(_tracks[t].steps[s]);
 
-                step->midiNote = random(64) + 12;
+                step->midiNote = random(3)*3 + 36;
                 step->velocity = (random(64) + 64 - 1);
                 step->tie = false;
             }

@@ -11,6 +11,8 @@
 #include "FastTrig.h"
 #include "mem.h"
 #include "controls.h"
+#include "MIDIUSB.h"
+#include "tests.h"
 
 #define ARDUINO_SERIAL_DELAY 10000
 #define SCENE_DELAY 5000
@@ -27,17 +29,13 @@ PolySynth polySynth;
 Sequencer seq(playStep);
 DSDisplay display(onDisplayUpdateTouch, &polySynth);
 
-
-
 SimpleTimer sceneRotationTimer(SCENE_DELAY, nextScene);
 SimpleTimer displayRefreshTimer(1000 / SCREEN_REFRESH_RATE, refreshDisplay);
 SimpleTimer audioOutPollTimer(1000 / SCREEN_REFRESH_RATE, monitorPeakOutput);
-SimpleTimer changeEnvelopeTimer(1000 / SCREEN_REFRESH_RATE, changeEnvelope);
+// SimpleTimer changeEnvelopeTimer(1000 / SCREEN_REFRESH_RATE, changeEnvelope);
 
-
-
-#ifdef USB_SERIAL
-SimpleTimer serialLogTimer(100, onSerialLogTimer);
+#ifdef USB_MIDI_AUDIO_SERIAL
+SimpleTimer serialLogTimer(10000, onSerialLogTimer);
 
 void delayForSerial()
 {
@@ -58,18 +56,22 @@ void synthLoop()
 
 FLASHMEM void setup()
 {
-#ifdef USB_SERIAL
+#ifdef USB_MIDI_AUDIO_SERIAL
   Serial.begin(115200);
 #endif
   display.begin();
   display.clearScreen(ILI9341_BLACK);
-#ifdef USB_SERIAL
+#ifdef USB_MIDI_AUDIO_SERIAL
   delayForSerial();
 #endif
   seq.setTempo(SEQ_TEMPO, 8);
   seq.play();
   display.nextScene();
   threads.addThread(synthLoop);
+
+  #ifdef RUNTESTS
+  runTests();
+  #endif
 }
 
 void nextScene()
@@ -87,26 +89,27 @@ void monitorPeakOutput()
 
 FLASHMEM void loop()
 {
-  //sceneRotationTimer.update();
+  // sceneRotationTimer.update();
+  // changeEnvelopeTimer.update();
   displayRefreshTimer.update();
   audioOutPollTimer.update();
-  changeEnvelopeTimer.update();
   controls.update();
-
-#ifdef USB_SERIAL
   serialLogTimer.update();
-#endif
 }
 
 void onSerialLogTimer()
 {
-  // simpleMemInfo();
+  /*
+  simpleMemInfo();
+
+  float cpu = AudioProcessorUsage();
+  float maxCpu = AudioProcessorUsageMax();
+  printf("cpu %2f\tmax %2f\t", cpu, maxCpu);
 
   for (int i = 0; i < NUMPOTS; i++)
   {
     Potentiometer *p = &controls.pots[i];
     printf("pot %d = %d\t", p->getPin(), p->getValue());
-    
   }
   for (int i = 0; i < NUMBUTTONS; i++)
   {
@@ -115,6 +118,7 @@ void onSerialLogTimer()
   }
 
   Serial.print("\n");
+  */
 }
 
 void onDisplayUpdateTouch() { display.update(); }
@@ -130,8 +134,7 @@ FLASHMEM void playStep(SeqStep *steps[SEQ_TRACKS])
 
 DSSceneEnvelope *es = display.env;
 FLASHMEM void changeEnvelope()
-{  
-
+{
   // polySynth.vcfL->frequency(vcf_EGL.read()*2500 + polySynth.filterLFO->valuePostGain());
   // polySynth.vcfR->frequency(vcf_EGR.read()*2500 + polySynth.filterLFO->valuePostGain());
   // polySynth.amp->attack(es->attack->getValue());

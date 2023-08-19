@@ -39,7 +39,7 @@ public:
             if (_scene != nullptr && _scene->visible)
             {
                 uint32_t now = millis();
-                 if (now - lastDisplayRefresh < 1000 / 10)
+                 if (now - lastDisplayRefresh < 1000 / 20)
                      return;
                 lastDisplayRefresh = now;
                 pixel_x = 0;
