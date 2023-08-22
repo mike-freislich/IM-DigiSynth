@@ -5,80 +5,104 @@
 #include <DSScene.h>
 #include <DSButton.h>
 #include <DSColor.h>
-#include "Parameters.h"
-#include "DSParameterElement.h"
+
 #include "DSEnvelopeGraph.h"
 #include "controls.h"
 #include "PolySynth.h"
+#include "PSVoice.h"
+#include "PSParameter.h"
+#include "DSParameterElement.h"
 
 class DSSceneEnvelope : public DSScene
 {
 public:
-    DSEnvelopeGraph *graph;
-    DSParameterElement *attack, *hold, *decay, *sustain, *release;
-
-    DSSceneEnvelope(ILI9341_t3n *lcd, String label, MyEnvelope *env) : DSScene(lcd)
+    DSSceneEnvelope(ILI9341_t3n *lcd, String label, PSEnvelope *env, Controls *controls) : DSScene(lcd)
     {
-        _env = env;
         _thisElement = (DSElement *)this;
+        _envelope = env;
+        _controls = controls;
         color.background = 0;
         setSceneName(label);
 
-        // create parameters
-        _parms = new EnvParameters(label);
-
-        // create elements
-        attack = (DSParameterElement *)addElement(new DSParameterElement(_lcd, _parms->getParm(PARM_ATTACK), _thisElement));
-        hold = (DSParameterElement *)addElement(new DSParameterElement(_lcd, _parms->getParm(PARM_HOLD), _thisElement));
-        decay = (DSParameterElement *)addElement(new DSParameterElement(_lcd, _parms->getParm(PARM_DECAY), _thisElement));
-        sustain = (DSParameterElement *)addElement(new DSParameterElement(_lcd, _parms->getParm(PARM_SUSTAIN), _thisElement));
-        release = (DSParameterElement *)addElement(new DSParameterElement(_lcd, _parms->getParm(PARM_RELEASE), _thisElement));
+        addDial(PSP_ENV_ATTACK, 0);
+        addDial(PSP_ENV_HOLD, -1);
+        addDial(PSP_ENV_DECAY, 1);
+        addDial(PSP_ENV_SUSTAIN, 2);
+        addDial(PSP_ENV_RELEASE, 3);
         layoutParams();
 
-        graph = (DSEnvelopeGraph *)addElement(new DSEnvelopeGraph(lcd, "graph", (EnvParameters *)_parms));
+        graph = (DSEnvelopeGraph *)addElement(new DSEnvelopeGraph(lcd, "graph", _envelope->params));
     }
 
     ~DSSceneEnvelope()
     {
         DSScene::~DSScene();
-        delete[] _parms;
+        // delete[] _parms;
+    }
+
+    void addDial(PSEnvelopeParam paramType, int potNum)
+    {
+        PSParameter *p = _envelope->params[paramType];
+        if (potNum != -1)
+            p->attachController((InputBase *)&_controls->pots[potNum]);
+        addElement(new DSParameterElement(_lcd, p, _thisElement));
     }
 
     void render()
     {
+        updateControls();
         DSScene::render();
     }
 
     void updateControls()
+    {        
+        if (visible)
+        {
+            if (_envelope->update()) {                            
+                graph->setShouldRedraw(true);
+            }
+        }
+    }
+
+    void show() override
     {
-        // get envelope parameters from the scene
-        attack->setValue(map(controls.pots[0].getLogValue(), POT_RANGE_MIN, POT_RANGE_MAX, 0, attack->getMax()));
-        decay->setValue(map(controls.pots[1].getLogValue(), POT_RANGE_MIN, POT_RANGE_MAX, 0, decay->getMax()));
-        sustain->setValue(map(controls.pots[2].getValue(), POT_RANGE_MIN, POT_RANGE_MAX, 0, sustain->getMax()));
-        release->setValue(map(controls.pots[3].getLogValue(), POT_RANGE_MIN, POT_RANGE_MAX, 0, release->getMax()));
-        _env->setParameters(attack->getValue(), 0, decay->getValue(), sustain->getValue() / 100, release->getValue());
-        graph->setShouldRedraw(true);
+        DSScene::show();
+        for (auto p : _envelope->params) 
+            p->activate();
+    }
+    void hide() override
+    {
+        DSScene::hide();
+        for (auto p : _envelope->params)
+            p->deactivate();        
     }
 
 protected:
     void layoutParams()
     {
-        int parmCount = _parms->getLength();
-        uint8_t xpad, ypad = 3;
-        int usableWidth = 280;
+        int parmCount = _envelope->params.size();
+        const int usableWidth = 280;
+        const int xmargin = (320 - usableWidth) / 2;
+        int ymargin = 3;
+        int horizontalSpacing = usableWidth / (parmCount - 2);
 
-        for (int i = 0; i < parmCount; i++)
+        int i = 0;
+        for (auto e : elements)
         {
-            DSElement *pe = elements[i + 1];
-            Rect bb = pe->getBoundingBox();
-            xpad = (usableWidth - (bb.width * parmCount)) / (parmCount);
-            pe->MoveTo(i * (bb.width + xpad) + (320 - usableWidth) / 2, this->height() - bb.height - ypad);
+            if (e->getLabel() == "PARM")
+            {
+                Rect bb = e->getBoundingBox();
+                e->MoveTo(xmargin + i * horizontalSpacing, this->height() - bb.height - ymargin);
+                i++;
+            }
         }
     }
 
 private:
+    DSEnvelopeGraph *graph;
     DSElement *_thisElement;
-    MyEnvelope *_env;
+    PSEnvelope *_envelope;
+    Controls *_controls;
 };
 
 #endif

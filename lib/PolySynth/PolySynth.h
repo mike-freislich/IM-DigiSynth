@@ -12,15 +12,16 @@
 #include "waveshaperTables.h"
 #include "PSDCO.h"
 #include "PSEnvelope.h"
+#include "PSVoice.h"
 
 #define AMPLITUDE (1.0)
 
 const uint8_t waves[] = {
     // WAVEFORM_SINE,
     // WAVEFORM_TRIANGLE,
-    WAVEFORM_SAWTOOTH,
-     //WAVEFORM_SQUARE,
-    //WAVEFORM_PULSE
+    WAVEFORM_SAWTOOTH
+    // WAVEFORM_SQUARE,
+    // WAVEFORM_PULSE
     // WAVEFORM_SAMPLE_HOLD
 };
 
@@ -59,41 +60,27 @@ const float velocity2amplitude[127] PROGMEM = {
     0.79201, 0.80430, 0.81668, 0.82916, 0.84174, 0.85440, 0.86717, 0.88003, 0.89298, 0.90602,
     0.91917, 0.93240, 0.94573, 0.95916, 0.97268, 0.98629, 1.00000};
 
-class MyEnvelope
-{
-public:
-    AudioEffectEnvelope *env;
-
-    MyEnvelope(AudioEffectEnvelope *env)
-    {
-        this->env = env;
-        setParameters(5, 15, 130, 0, 0);
-    }
-
-    void setParameters(float attack, float hold, float decay, float sustain, float release)
-    {
-        if (env == nullptr)
-            return;
-        env->attack(attack);
-        env->hold(hold);
-        env->decay(decay);
-        env->sustain(sustain);
-        env->release(release);
-    }
-
-private:
-};
-
-class MyMixer
-{
-
-};
-
-class Voice
-{
-public:
-private:
-};
+// class MyEnvelope
+// {
+// public:
+//     AudioEffectEnvelope *env;
+//     MyEnvelope(AudioEffectEnvelope *env)
+//     {
+//         this->env = env;
+//         setParameters(5, 15, 130, 0, 0);
+//     }
+//     void setParameters(float attack, float hold, float decay, float sustain, float release)
+//     {
+//         if (env == nullptr)
+//             return;
+//         env->attack(attack);
+//         env->hold(hold);
+//         env->decay(decay);
+//         env->sustain(sustain);
+//         env->release(release);
+//     }
+// private:
+// };
 
 struct StereoLevels
 {
@@ -105,32 +92,28 @@ struct StereoLevels
 class PolySynth
 {
 public:
-    MyEnvelope osc1_PEnv = MyEnvelope(&osc1PENV);
-    MyEnvelope osc1_FEnv = MyEnvelope(&filter1env);
-    MyEnvelope osc1_AEnv = MyEnvelope(&AENV1);
-
-    MyEnvelope osc2_PEnv = MyEnvelope(&osc2PENV);
-    MyEnvelope osc2_FEnv = MyEnvelope(&filter2env);
-    MyEnvelope osc2_AEnv = MyEnvelope(&AENV2);
-
     DSLFO *filterLFO;
     DSLFO *filterLFO2;
     DSLFO *pitchLFO;
     DSLFO *pitchLFO2;
 
-    PSDCO *dco1;
+    PSVoice voice1 = PSVoice("Voice1");
 
     PolySynth()
     {
+    }
+    ~PolySynth() {}
+
+    void init()
+    {
         AudioMemory(32);
 
-
-        //filterLFO = new DSLFO(WAVEFORM_TRIANGLE, 0.05, 1.0);
-        //filterLFO->addConnectionOut(&filter1modMixer, 1);
-        //filterLFO->addConnectionOut(&filter2modMixer, 1);
+        // filterLFO = new DSLFO(WAVEFORM_TRIANGLE, 0.05, 1.0);
+        // filterLFO->addConnectionOut(&filter1modMixer, 1);
+        // filterLFO->addConnectionOut(&filter2modMixer, 1);
 
         filterLFO2 = new DSLFO(WAVEFORM_TRIANGLE, 0.05, 1.0);
-        //filterLFO2 = new DSLFO(WAVEFORM_TRIANGLE, 36, 0.2);
+        // filterLFO2 = new DSLFO(WAVEFORM_TRIANGLE, 36, 0.2);
         filterLFO2->addConnectionOut(&filter1modMixer, 2);
         filterLFO2->addConnectionOut(&filter2modMixer, 2);
 
@@ -173,8 +156,9 @@ public:
         osc2FMmixer.gain(3, 1.0);
 
         // filter
-        osc1_FEnv.setParameters(10, 0, 130, 0, 0);
-        osc2_FEnv.setParameters(10, 0, 130, 0, 0);
+        // voice1.dco1->vcf_env->set(10, 0, 130, 0, 0);
+        // osc1_FEnv.setParameters(10, 0, 130, 0, 0);
+        // osc2_FEnv.setParameters(10, 0, 130, 0, 0);
         ladder1.resonance(0.8);
         ladder2.resonance(0.8);
         voiceFENVdc.amplitude(1);
@@ -207,12 +191,10 @@ public:
         AudioProcessorUsageMaxReset();
         AudioMemoryUsageMaxReset();
 
-        dco1 = new PSDCO("DCO1", &AENV1, &filter1env, &osc1PENV);
-        //dco1->set(PSEnvelopeParam::PSP_ENV_AMOUNT, 0.0); 
-        //dco1->params[PSEnvelopeParam::PSP_ENV_AMOUNT]->value;        
+        // dco1 = new PSDCO("DCO1", &AENV1, &filter1env, &osc1PENV);
+        // dco1->set(PSEnvelopeParam::PSP_ENV_AMOUNT, 0.0);
+        // dco1->params[PSEnvelopeParam::PSP_ENV_AMOUNT]->value;
     }
-
-    ~PolySynth() {}
 
     void playNote(uint8_t midiNote, uint8_t velocity)
     {
@@ -226,13 +208,13 @@ public:
         AudioNoInterrupts();
         waveformLeft.begin(AMPLITUDE * velocity2amplitude[velocity], noteFreqs[midiNote] - _detune, waves[waveIndex]);
         waveformRight.begin(AMPLITUDE * velocity2amplitude[velocity], noteFreqs[midiNote] + _detune, waves[waveIndex]); // detune
-        
-        osc1_AEnv.env->noteOn();
-        osc2_AEnv.env->noteOn();
-        osc1_FEnv.env->noteOn();
-        osc2_FEnv.env->noteOn();
-        osc1_PEnv.env->noteOn();
-        osc2_PEnv.env->noteOn();        
+
+        voice1.dco1->vca_env->noteOn();
+        voice1.dco1->vcf_env->noteOn();
+        voice1.dco1->mod_env->noteOn();
+        voice1.dco2->vca_env->noteOn();
+        voice1.dco2->vcf_env->noteOn();
+        voice1.dco2->mod_env->noteOn();
         AudioInterrupts();
     }
 
@@ -314,8 +296,8 @@ public:
         osc = clamp(osc, 0, 1);
         value = clamp(value, -1, 1);
 
-        //float balanceFactorRight = (_balance + 1) / 2;
-        //float balanceFactorLeft = 1 - balanceFactorRight;
+        // float balanceFactorRight = (_balance + 1) / 2;
+        // float balanceFactorLeft = 1 - balanceFactorRight;
 
         float rightAmount = ((value + 1) / 2); // * balanceFactorRight;
         float leftAmount = (1 - rightAmount);  // * balanceFactorLeft;

@@ -10,17 +10,15 @@
 #include <DSLabel.h>
 #include <DSVerticalMeter.h>
 #include <DSColor.h>
-#include "Parameters.h"
+#include "PSParameter.h"
 
 class DSScene
 {
 
 public:
-    bool visible = false;
-
     DSScene(ILI9341_t3n *lcd) : _lcd(lcd)
     {
-        DSElement *panel = new DSPanel(_lcd, "", Rect(2, 0, 318, 25), DSElement::Color(COLOR_BORDER, COLOR_HEADING_FILL, COLOR_BACKGROUND));
+        DSElement *panel = new DSPanel(_lcd, "TOPBAR", Rect(2, 0, 318, 25), DSElement::Color(COLOR_BORDER, COLOR_HEADING_FILL, COLOR_BACKGROUND));
         DSElement *heading = new DSLabel(_lcd, ".", DSElement::Color(0, 0, ILI9341_WHITE));
 
         heading->setFont(FONT_UI_HEADING);
@@ -77,7 +75,6 @@ public:
             {
                 e->setShouldRedraw(true);
             }
-
         }
         _lcd->fillScreen(color.background);
     }
@@ -97,7 +94,7 @@ public:
         return _lcd->width();
     }
 
-    ParameterList *getParameters() { return _parms; };
+    PSParameterVector getParameters() { return _parms; };
 
     DSElement *getElement(String s)
     {
@@ -109,16 +106,21 @@ public:
         return nullptr;
     }
 
+    virtual void show() { visible = true; }
+    virtual void hide() { visible = false; }
+    virtual bool isVisible() { return visible; }
+
 protected:
     ILI9341_t3n *_lcd;
     DSElement *_sceneName;
     DSVerticalMeter *_verticalMeter;
     DSElementVector elements;
-    ParameterList *_parms;
+    PSParameterVector _parms;
     struct Color
     {
         uint16_t background = 0;
     } color;
+    bool visible = false;
 };
 
 typedef vector<DSScene *> DSSceneVector;

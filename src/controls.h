@@ -16,16 +16,23 @@
 #define NUMBUTTONS 1
 #define PIN_ROTARY_BUTTONA A17
 
+enum ControllerType { CT_POT, CT_BTN, CT_ROTARY, CT_NONE };
+
 class InputBase
 {
 public:
+    
     InputBase() {}
     InputBase(uint8_t pin, uint16_t debounceMillis = 10)
     {
         _pin = pin;
         _debounceMS = debounceMillis;
+        _analogMin = -1;
+        _analogMax = -1;
     }
     ~InputBase() {}
+
+    ControllerType getType() { return controllerType; }
 
     void setDebounceTime(uint16_t ms = 10)
     {
@@ -43,24 +50,33 @@ public:
         return false;
     }
 
-    uint8_t getPin() { return _pin; }
+    virtual void update() {}
+    virtual float getValue() { return _value; }
 
-    // virtual bool setValue(int value);
-    // virtual void update();
-    // virtual float getValue();
+    uint8_t getPin() { return _pin; }
+    float getAnalogMin() { return _analogMin; }
+    float getAnalogMax() { return _analogMax; }
 
 protected:
     uint8_t _pin;
-    int _value;
+    int _value, _analogMin, _analogMax;
     uint16_t _debounceMS;
     uint32_t _lastChanged;
+    ControllerType controllerType = CT_NONE;
 };
 
 class Potentiometer : public InputBase
 {
 public:
-    Potentiometer() {}
-    Potentiometer(uint8_t pin) : InputBase(pin) {}
+    Potentiometer() {
+        controllerType = ControllerType::CT_POT;
+    }
+    Potentiometer(uint8_t pin) : InputBase(pin)
+    {
+        _analogMin = POT_RANGE_MIN;
+        _analogMax = POT_RANGE_MAX;
+        controllerType = ControllerType::CT_POT;
+    }
     ~Potentiometer() {}
 
     bool setValue(int value)
@@ -73,13 +89,9 @@ public:
         return false;
     }
 
-    float getValue() { return _value; }
-
-    long getLogValue()
-    {
-        return (_value * (_value + 1)) >> 10; // 10bit resolution
-    }
-    void update() { setValue(analogRead(_pin)); }
+    float getValue() override { return (float)getLogValue(); }
+    long getLogValue() { return (_value * (_value + 1)) >> 10; } // 10bit resolution
+    void update() override { setValue(analogRead(_pin)); }
 
 protected:
 };
@@ -87,21 +99,17 @@ protected:
 class Button : public InputBase
 {
 public:
-    Button() : InputBase() {}
+    Button() : InputBase() {
+        controllerType = ControllerType::CT_BTN;
+    }
     Button(int pin, uint16_t debounceMillis = 10) : InputBase(pin, debounceMillis)
     {
         pinMode(pin, INPUT_PULLUP);
+        controllerType = ControllerType::CT_BTN;
     }
 
-    bool pressed()
-    {
-        return getValue();
-    }
-
-    float getValue()
-    {
-        return (_value == LOW);
-    }
+    bool pressed() { return getValue(); }
+    float getValue() override { return (_value == LOW); }
 
     bool setValue(int value)
     {
@@ -114,7 +122,7 @@ public:
         return false;
     }
 
-    void update() { setValue(digitalRead(_pin)); }
+    void update() override { setValue(digitalRead(_pin)); }
 
 protected:
 };
@@ -152,9 +160,4 @@ protected:
     }
 };
 
-Controls controls;
-
-void testControls()
-{
-}
 #endif

@@ -8,8 +8,6 @@
 class PSComponent;
 
 using namespace std;
-
-typedef vector<PSParameter *> PSParameterVector;
 typedef vector<PSComponent *> PSComponentVector;
 typedef vector<String> SplitStrings;
 
@@ -53,7 +51,7 @@ public:
         {
             if (param->name == parameterName)
             {
-                param->value = v;
+                param->setValue(v);
                 return true;
             }
         }
@@ -64,7 +62,7 @@ public:
     {
         if (parameterIndex > (params.size() - 1))
             return false;
-        params[parameterIndex]->value = v;
+        params[parameterIndex]->setValue(v);
         return true;
     }
 
@@ -91,8 +89,9 @@ public:
     {
         String s = "*" + name + "{";
         for (auto param : params)
-            s += param->name + ":" + param->value + ",";
-        s.remove(s.length() - 1);
+            s += param->name + ":" + param->getValue() + ",";
+        if (s.charAt(s.length() - 1) == ',')
+            s.remove(s.length() - 1);
         for (auto child : children)
             s += child->toString();
         s += "}";
@@ -165,15 +164,18 @@ public:
         }
     }
 
-    void addParameter(String name, float value)
+    PSParameter *addParameter(String name, float value, float rangeMin, float rangeMax)
     {
-        params.push_back(new PSParameter(name, value));
+        PSParameter *newp = new PSParameter(name, value, rangeMin, rangeMax);
+        params.push_back(newp);
+        return newp;
     }
 
-    void addChild(PSComponent *child)
+    PSComponent *addChild(PSComponent *child)
     {
         children.push_back(child);
         child->parent = this;
+        return child;
     }
 
     PSComponent *childComponent(String name)
@@ -184,10 +186,14 @@ public:
                 return child;
         }
         return nullptr;
-    }
+    }    
+
+    virtual void attachControllers(Controls *c) {}
+    virtual void detachControllers() {}
 
 protected:
     AudioConnectionVector _connections;
+    
 };
 
 typedef std::vector<PSComponent *> PSComponentVector;

@@ -20,20 +20,17 @@
 void nextScene();
 void refreshDisplay();
 void onDisplayUpdateTouch();
-void changeEnvelope();
 void onSerialLogTimer();
 void monitorPeakOutput();
 void playStep(SeqStep *_steps[SEQ_TRACKS]);
 
-PolySynth polySynth;
-Sequencer seq(playStep);
-DSDisplay display(onDisplayUpdateTouch, &polySynth);
+Controls controls;
+PolySynth polySynth = PolySynth();
+Sequencer seq = Sequencer(playStep);
+DSDisplay display = DSDisplay(onDisplayUpdateTouch, &polySynth, &controls);
 
-SimpleTimer sceneRotationTimer(SCENE_DELAY, nextScene);
 SimpleTimer displayRefreshTimer(1000 / SCREEN_REFRESH_RATE, refreshDisplay);
 SimpleTimer audioOutPollTimer(1000 / SCREEN_REFRESH_RATE, monitorPeakOutput);
-// SimpleTimer changeEnvelopeTimer(1000 / SCREEN_REFRESH_RATE, changeEnvelope);
-
 #ifdef USB_MIDI_AUDIO_SERIAL
 SimpleTimer serialLogTimer(10000, onSerialLogTimer);
 
@@ -61,17 +58,25 @@ FLASHMEM void setup()
 #endif
   display.begin();
   display.clearScreen(ILI9341_BLACK);
+
 #ifdef USB_MIDI_AUDIO_SERIAL
   delayForSerial();
 #endif
+
+#ifdef RUNTESTS
+  runTests();
+#endif
+
+  polySynth.init();
+  String data = polySynth.voice1.toString();
+  Serial.println("-------------");
+  Serial.println(data);
+  Serial.println("-------------");
+
   seq.setTempo(SEQ_TEMPO, 8);
   seq.play();
   display.nextScene();
   threads.addThread(synthLoop);
-
-  #ifdef RUNTESTS
-  runTests();
-  #endif
 }
 
 void nextScene()
@@ -89,22 +94,21 @@ void monitorPeakOutput()
 
 FLASHMEM void loop()
 {
-  // sceneRotationTimer.update();
-  // changeEnvelopeTimer.update();
   displayRefreshTimer.update();
   audioOutPollTimer.update();
   controls.update();
   serialLogTimer.update();
 }
 
+extern float tempmonGetTemp(void);
 void onSerialLogTimer()
 {
-  /*
   simpleMemInfo();
 
   float cpu = AudioProcessorUsage();
   float maxCpu = AudioProcessorUsageMax();
-  printf("cpu %2f\tmax %2f\t", cpu, maxCpu);
+
+  printf("cpu %.2f\tmax %.2f\ttemp %2.f°C\t", cpu, maxCpu, tempmonGetTemp());
 
   for (int i = 0; i < NUMPOTS; i++)
   {
@@ -118,10 +122,12 @@ void onSerialLogTimer()
   }
 
   Serial.print("\n");
-  */
 }
 
-void onDisplayUpdateTouch() { display.update(); }
+void onDisplayUpdateTouch()
+{
+  display.update();
+}
 
 FLASHMEM void playStep(SeqStep *steps[SEQ_TRACKS])
 {
@@ -130,19 +136,4 @@ FLASHMEM void playStep(SeqStep *steps[SEQ_TRACKS])
     if (i == 0)
       polySynth.playNote(steps[i]->midiNote, steps[i]->velocity);
   }
-}
-
-DSSceneEnvelope *es = display.env;
-FLASHMEM void changeEnvelope()
-{
-  // polySynth.vcfL->frequency(vcf_EGL.read()*2500 + polySynth.filterLFO->valuePostGain());
-  // polySynth.vcfR->frequency(vcf_EGR.read()*2500 + polySynth.filterLFO->valuePostGain());
-  // polySynth.amp->attack(es->attack->getValue());
-  // polySynth.amp->attack(es->attack->sinInc(1));
-  //  polySynth.amp->hold(es->hold->sinInc(2));
-  // polySynth.amp->decay(es->decay->sinInc(1));
-  // polySynth.amp->sustain(es->sustain->sinInc(3));
-  // polySynth.amp->release(es->release->sinInc(6));
-
-  es->graph->setShouldRedraw(true);
 }

@@ -36,7 +36,7 @@ public:
 
         if (getShouldRedraw())
         {
-            if (_scene != nullptr && _scene->visible)
+            if (_scene != nullptr && _scene->isVisible())
             {
                 uint32_t now = millis();
                  if (now - lastDisplayRefresh < 1000 / 20)
@@ -69,7 +69,7 @@ public:
     // Runs on Audio Thread
     void AddtoBuffer(int16_t *audio)
     {
-        if (_scene != nullptr && _scene->visible)
+        if (_scene != nullptr && _scene->isVisible())
         {
             audio++;
             if (bufferBlock == 0)
@@ -97,7 +97,7 @@ public:
     // runs on Audio Thread
     void update(void)
     {
-        if (_scene != nullptr && _scene->visible)
+        if (_scene != nullptr && _scene->isVisible())
         {
             audio_block_t *block;
             block = receiveReadOnly(0);

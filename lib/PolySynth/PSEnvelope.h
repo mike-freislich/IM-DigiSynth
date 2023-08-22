@@ -20,13 +20,13 @@ class PSEnvelope : public PSComponent
 public:
     PSEnvelope(String name, AudioEffectEnvelope *envelope) : PSComponent(name)
     {
-        addParameter("Del", 0);
-        addParameter("Atk", 3);
-        addParameter("Hld", 0);
-        addParameter("Dcy", 0);
-        addParameter("Sus", 50);
-        addParameter("Rel", 3);
-        addParameter("Amt", 1.0);
+        pDelay = addParameter("Del", 0, 0, 1000);
+        pAttack = addParameter("Atk", 3, 0, 1000);
+        pHold = addParameter("Hld", 0, 0, 1000);
+        pDecay = addParameter("Dcy", 0, 0, 1000);
+        pSustain = addParameter("Sus", 50, 0, 100);
+        pRelease = addParameter("Rel", 3, 0, 1000);
+        pAmount = addParameter("Amt", 1.0, 0, 1);
         _envelope = envelope;
     }
 
@@ -35,30 +35,62 @@ public:
         _connections.push_back(new AudioConnection(*_envelope, 0, *dest, channel));
     }
 
-    FLASHMEM void update(float attack, float decay, float sustain, float release, float delay = 0, float hold = 0)
+    FLASHMEM void updateAudioStreamComponent()
     {
-        params[PSP_ENV_ATTACK]->value = attack;
-        params[PSP_ENV_DECAY]->value = decay;
-        params[PSP_ENV_SUSTAIN]->value = sustain;
-        params[PSP_ENV_RELEASE]->value = release;
-        params[PSP_ENV_DELAY]->value = delay;
-        params[PSP_ENV_HOLD]->value = hold;
-        this->updateAudioStreamComponent();
+        _envelope->attack(params[PSP_ENV_ATTACK]->getValue());
+        _envelope->decay(params[PSP_ENV_DECAY]->getValue());
+        _envelope->sustain(params[PSP_ENV_SUSTAIN]->getValue());
+        _envelope->release(params[PSP_ENV_RELEASE]->getValue());
+        _envelope->delay(params[PSP_ENV_DELAY]->getValue());
+        _envelope->hold(params[PSP_ENV_HOLD]->getValue());
     }
 
-    FLASHMEM void updateAudioStreamComponent()
-    {        
-        _envelope->attack(params[PSP_ENV_ATTACK]->value);
-        _envelope->decay(params[PSP_ENV_DECAY]->value);
-        _envelope->sustain(params[PSP_ENV_SUSTAIN]->value);
-        _envelope->release(params[PSP_ENV_RELEASE]->value);
-        _envelope->delay(params[PSP_ENV_DELAY]->value);
-        _envelope->hold(params[PSP_ENV_HOLD]->value);
+    FLASHMEM void noteOn()
+    {
+        _envelope->noteOn();
+    }
+
+    /*
+     * PSEnvelope::update()
+     * If any parameters for the envelope changed,
+     * copy to the AudioEnvelope 
+     */
+    bool update()
+    {
+        // update from controllers
+        bool updated = false;
+        for (auto p : params)
+        {
+            if (p->didChange(true))
+                updated = true;
+        }
+
+        if (updated)
+            this->updateAudioStreamComponent();
+
+        return updated;
+    }
+
+    void attachControllers(Controls *c) override
+    {
+        pAttack->attachController((InputBase *)&c->pots[0]);
+        pDecay->attachController((InputBase *)&c->pots[1]);
+        pSustain->attachController((InputBase *)&c->pots[2]);
+        pRelease->attachController((InputBase *)&c->pots[3]);
+    }
+
+    void detachControllers() override
+    {
+        pAttack->detachController();
+        pDecay->detachController();
+        pSustain->detachController();
+        pRelease->detachController();
     }
 
 private:
     AudioSynthWaveformDc *_carrier;
     AudioEffectEnvelope *_envelope;
+    PSParameter *pAttack, *pDecay, *pSustain, *pRelease, *pDelay, *pHold, *pAmount;
 };
 
 #endif

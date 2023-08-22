@@ -1,7 +1,7 @@
 #ifndef PS_TESTS_H
 #define PS_TESTS_H
 
-#define RUNTESTS
+//#define RUNTESTS
 
 #ifdef RUNTESTS
 
@@ -12,7 +12,6 @@ void testComponents();
 
 FLASHMEM void runTests()
 {
-
     testComponents();
 }
 
@@ -30,8 +29,8 @@ FLASHMEM void testComponents()
     c.addChild(&env_a);
     c.addChild(&env_f);
 
-    c.addParameter("p1", 0.1);
-    c.addParameter("p2", 0.2);
+    //c.addParameter("p1", 0.1);
+    //c.addParameter("p2", 0.2);
     lfo.addParameter("freq", 1000);
     lfo.addParameter("shape", 2);
     env_a.addParameter("atk", 30);

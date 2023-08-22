@@ -58,10 +58,6 @@ class DSSynthPatch
     uint8_t ringMod_waveform = WAVEFORM_SINE;
     float ringMod_frequency = 100;
 
-    
-
-
-
 
 #pragma endregion
 

@@ -1,12 +1,15 @@
+/*
 #ifndef PARAMETERS_H
 #define PARAMETERS_H
 
 #include <vector>
 #include "FastTrig.h"
 
+
 class Parameter;
 
 typedef void (*ParameterChangedCallback)(Parameter *, float);
+
 
 class Parameter
 {
@@ -118,6 +121,8 @@ protected:
 private:
 };
 
+
+
 class EnvParameters : public ParameterList
 {
 public:
@@ -145,4 +150,6 @@ public:
     }
 };
 
+
 #endif
+*/

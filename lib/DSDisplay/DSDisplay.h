@@ -27,26 +27,24 @@
 class DSDisplay
 {
 public:
-    DSSceneEnvelope *env;
-
-    DSDisplay(void (*displayTouchCallback)(), PolySynth *synth)
-    {        
+    DSDisplay(void (*displayTouchCallback)(), PolySynth *synth, Controls *controls)
+    {
+        _controls = controls;
         sceneIndex = 0;
         tft.setTextSize(1);
         this->onDisplayUpdateTouch = displayTouchCallback;
 
-        // scenes.push_back(new DSSceneSplash(&tft));
+        PSDCO *dco1 = synth->voice1.dco1;
+        PSDCO *dco2 = synth->voice1.dco2;
         addScene(new DSSceneVoice(&tft));
-        osc1AEnv = addScene(new DSSceneEnvelope(&tft, F("OSC1 - A-ENV"), &synth->osc1_AEnv));
-        osc1FEnv = addScene(new DSSceneEnvelope(&tft, F("OSC1 - F-ENV"), &synth->osc1_FEnv));
-        osc1PEnv = addScene(new DSSceneEnvelope(&tft, F("OSC1 - P-ENV"), &synth->osc1_PEnv));  
-        
-        osc2AEnv = addScene(new DSSceneEnvelope(&tft, F("OSC2 - A-ENV"), &synth->osc2_AEnv));
-        osc2FEnv = addScene(new DSSceneEnvelope(&tft, F("OSC2 - F-ENV"), &synth->osc2_FEnv)); 
-        osc2PEnv = addScene(new DSSceneEnvelope(&tft, F("OSC2 - P-ENV"), &synth->osc2_PEnv));
+        addScene(new DSSceneEnvelope(&tft, F("OSC1 - A-ENV"), dco1->vca_env, controls));
+        addScene(new DSSceneEnvelope(&tft, F("OSC1 - F-ENV"), dco1->vcf_env, controls));
+        addScene(new DSSceneEnvelope(&tft, F("OSC1 - P-ENV"), dco1->mod_env, controls));
+        addScene(new DSSceneEnvelope(&tft, F("OSC2 - A-ENV"), dco2->vca_env, controls));
+        addScene(new DSSceneEnvelope(&tft, F("OSC2 - F-ENV"), dco2->vcf_env, controls));
+        addScene(new DSSceneEnvelope(&tft, F("OSC2 - P-ENV"), dco2->mod_env, controls));
 
-        env = osc1AEnv;
-        scenes[sceneIndex]->visible = true;
+        scenes[sceneIndex]->show();
         tft.setFont(FONT_UI_LABEL);
     }
     ~DSDisplay() {}
@@ -83,20 +81,22 @@ public:
             }
         }
         */
-
     }
 
     void render()
     {
-        if (controls.buttons[0].pressed()) {  
+        if (_controls->buttons[0].pressed())
+        {
             uint32_t now = millis();
-            if (now - lastSceneChange > 500) {
+            if (now - lastSceneChange > 500)
+            {
                 nextScene();
                 lastSceneChange = now;
-            }            
+            }
         };
 
-        if (sceneIndex != 0) {
+        if (sceneIndex != 0)
+        {
             ((DSSceneEnvelope *)scenes[sceneIndex])->updateControls();
         }
 
@@ -115,11 +115,11 @@ public:
 
     void nextScene()
     {
-        scenes[sceneIndex]->visible = false;
+        scenes[sceneIndex]->hide();
         sceneIndex = (sceneIndex + 1) % scenes.size();
-        scenes[sceneIndex]->visible = true;
+        scenes[sceneIndex]->show();
         scenes[sceneIndex]->clear();
-        //render();
+        // render();
     }
 
     uint8_t getSceneID()
@@ -136,16 +136,10 @@ private:
     ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC);
     XPT2046_Touchscreen ts = XPT2046_Touchscreen(TOUCH_CS, TIRQ_PIN);
     void (*onDisplayUpdateTouch)();
+    Controls *_controls = nullptr;
 
-    DSSceneVector scenes;
     int sceneIndex;
-    DSSceneEnvelope *osc1AEnv;
-    DSSceneEnvelope *osc2AEnv;
-    DSSceneEnvelope *osc1FEnv;
-    DSSceneEnvelope *osc2FEnv;
-    DSSceneEnvelope *osc1PEnv;
-    DSSceneEnvelope *osc2PEnv;
-
+    DSSceneVector scenes;
     uint32_t lastSceneChange;
 
     template <typename T>
