@@ -7,7 +7,7 @@
 #include <SPI.h>
 #include <SerialFlash.h>
 #include <patching.h>
-#include "DSPatchManager.h"
+#include "PSPatchManager.h"
 #include "DSLFO.h"
 #include "waveshaperTables.h"
 #include "PSDCO.h"
@@ -17,12 +17,12 @@
 #define AMPLITUDE (1.0)
 
 const uint8_t waves[] = {
-    // WAVEFORM_SINE,
-    // WAVEFORM_TRIANGLE,
-    WAVEFORM_SAWTOOTH
-    // WAVEFORM_SQUARE,
-    // WAVEFORM_PULSE
-    // WAVEFORM_SAMPLE_HOLD
+    WAVEFORM_SINE,
+    WAVEFORM_TRIANGLE,
+    WAVEFORM_SAWTOOTH,
+    WAVEFORM_SQUARE,
+    WAVEFORM_PULSE
+    //WAVEFORM_SAMPLE_HOLD
 };
 
 const float noteFreqs[128] PROGMEM = {
@@ -60,34 +60,14 @@ const float velocity2amplitude[127] PROGMEM = {
     0.79201, 0.80430, 0.81668, 0.82916, 0.84174, 0.85440, 0.86717, 0.88003, 0.89298, 0.90602,
     0.91917, 0.93240, 0.94573, 0.95916, 0.97268, 0.98629, 1.00000};
 
-// class MyEnvelope
-// {
-// public:
-//     AudioEffectEnvelope *env;
-//     MyEnvelope(AudioEffectEnvelope *env)
-//     {
-//         this->env = env;
-//         setParameters(5, 15, 130, 0, 0);
-//     }
-//     void setParameters(float attack, float hold, float decay, float sustain, float release)
-//     {
-//         if (env == nullptr)
-//             return;
-//         env->attack(attack);
-//         env->hold(hold);
-//         env->decay(decay);
-//         env->sustain(sustain);
-//         env->release(release);
-//     }
-// private:
-// };
-
 struct StereoLevels
 {
     float left, right;
     StereoLevels() {}
     StereoLevels(float left, float right) : left(left), right(right) {}
 };
+
+
 
 class PolySynth
 {
@@ -111,7 +91,6 @@ public:
         // filterLFO = new DSLFO(WAVEFORM_TRIANGLE, 0.05, 1.0);
         // filterLFO->addConnectionOut(&filter1modMixer, 1);
         // filterLFO->addConnectionOut(&filter2modMixer, 1);
-
         filterLFO2 = new DSLFO(WAVEFORM_TRIANGLE, 0.05, 1.0);
         // filterLFO2 = new DSLFO(WAVEFORM_TRIANGLE, 36, 0.2);
         filterLFO2->addConnectionOut(&filter1modMixer, 2);
@@ -130,11 +109,11 @@ public:
         hpf2.resonance(0);
 
         // pitchLFO = new DSLFO(WAVEFORM_SAMPLE_HOLD, 32, 0.005);
-        // pitchLFO->addConnectionOut(&osc1modMixer, 0);
+        // pitchLFO->addConnectionOut(&osc1mod, 0);
         // pitchLFO->addConnectionOut(&osc2modMixer, 0);
         // pitchLFO2 = new DSLFO(WAVEFORM_SINE, 0.2, 1);
         // pitchLFO2->addConnectionOut(&osc1modMixer, 1);
-        // pitchLFO2->addConnectionOut(&osc2modMixer, 1);
+        // pitchLFO2->addConnectionOut(&osc2modMixer, 1);        
         // this->osc1_PEnv.setParameters(5, 15, 130, 0, 0);
         // this->osc2_PEnv.setParameters(5, 15, 130, 0, 0);
 
@@ -172,7 +151,7 @@ public:
         voiceGainLeft.gain(1.0);
         voiceGainRight.gain(1.0);
 
-        _detune = 0.5;
+        _detune = 0.1;
 
         balance(0);
         pan(0, -1);
@@ -182,10 +161,10 @@ public:
         waveshapePreAmp2.gain(1);
         setWaveShaper(29);
         initOscMixer();
-        setNoise(NoiseType::noiseOff);
+        setNoise(NoiseType::pinkNoise);
 
-        ringMod(0.2, 100, WAVEFORM_SINE);
-        xmod(0, 0.9);
+        ringMod(0.0, 500, WAVEFORM_SAMPLE_HOLD);
+        xmod(0, 0.5);
         xmod(1, 0.5);
 
         AudioProcessorUsageMaxReset();
@@ -193,17 +172,17 @@ public:
 
         // dco1 = new PSDCO("DCO1", &AENV1, &filter1env, &osc1PENV);
         // dco1->set(PSEnvelopeParam::PSP_ENV_AMOUNT, 0.0);
-        // dco1->params[PSEnvelopeParam::PSP_ENV_AMOUNT]->value;
+        // dco1->params[PSEnvelopeParam::PSP_ENV_AMOUNT]->value;        
     }
 
     void playNote(uint8_t midiNote, uint8_t velocity)
     {
-        // uint32_t now = millis();
-        // if (now - waveTimer > 10000)
-        // {
-        //     waveTimer = now;
-        //     nextWaveForm();
-        // }
+        uint32_t now = millis();
+        if (now - waveTimer > 10000)
+        {
+            waveTimer = now;
+            nextWaveForm();
+        }
 
         AudioNoInterrupts();
         waveformLeft.begin(AMPLITUDE * velocity2amplitude[velocity], noteFreqs[midiNote] - _detune, waves[waveIndex]);
@@ -222,18 +201,18 @@ public:
 
     void stopNote()
     {
-        AENV1.noteOff();
-        AENV2.noteOff();
-        filter1env.noteOff();
-        filter2env.noteOff();
-        osc1PENV.noteOff();
-        osc2PENV.noteOff();
+        // voice1.dco1->vca_env->noteOn();
+        // voice1.dco1->vcf_env->noteOn();
+        // voice1.dco1->mod_env->noteOn();
+        // voice1.dco2->vca_env->noteOn();
+        // voice1.dco2->vcf_env->noteOn();
+        // voice1.dco2->mod_env->noteOn();       
     }
 
     StereoLevels getPeakLevel()
     {
         return StereoLevels(peakLeft.read(), peakRight.read());
-    }
+    }    
 
 #pragma region Synth Init
 
@@ -241,12 +220,13 @@ public:
     {
         osc1waveMixer.gain(0, 0.5); // waveform osc1 left
         osc1waveMixer.gain(1, 1.0); // waveform osc1 post AM left
-        osc1waveMixer.gain(2, 0.2); // white noise left
-        osc1waveMixer.gain(3, 0.2); // pink noise left
+        osc1waveMixer.gain(2, 0.01); // white noise left
+        osc1waveMixer.gain(3, 0.01); // pink noise left
+
         osc2waveMixer.gain(0, 0.5); // waveform osc2 right
         osc2waveMixer.gain(1, 1.0); // waveform osc2 post AM left
-        osc2waveMixer.gain(2, 0.2); // white noise right
-        osc2waveMixer.gain(3, 0.2); // pink noise right
+        osc2waveMixer.gain(2, 0.01); // white noise right
+        osc2waveMixer.gain(3, 0.01); // pink noise right
     }
 
     enum NoiseType
@@ -328,6 +308,19 @@ public:
 
 #pragma endregion
 
+    void savePatch(uint16_t patchNo) 
+    {   
+        String data = voice1.toString();
+        patchManager.savePatch("patch000.psp", data);
+    }
+
+    void loadPatch(uint16_t patchNo)
+    {
+        String data = patchManager.loadPatch("patch000.psp");
+        if (data)
+            voice1.fromString(data);
+
+    }
 private:
     uint32_t waveTimer;
     uint8_t waveIndex;

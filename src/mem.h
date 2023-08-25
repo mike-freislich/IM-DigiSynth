@@ -29,10 +29,11 @@ FLASHMEM void simpleMemInfo()
   auto sp = (char *)__builtin_frame_address(0);
   
   auto stack = sp - _ebss;
-  printf("avail STACK %8d b %5d kb\n", stack, stack >> 10);
+//  printf("avail STACK %8db %5dkb, ", stack, stack >> 10);
 
   auto heap = _heap_end - __brkval;
-  printf("avail HEAP  %8d b %5d kb\n", heap, heap >> 10);
+//  printf("avail HEAP  %8db %5dkb, ", heap, heap >> 10);
+  printf("STACK/HEAP (%5dk,%5dkb)",stack >> 10, heap >> 10);
 }
 
 FLASHMEM void memInfo()

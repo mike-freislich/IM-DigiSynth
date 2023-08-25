@@ -48,29 +48,6 @@ public:
         }
     }
 
-    void drawDial()
-    {
-        int i, v = parameter->getScaled(arcStart, arcEnd);
-        int iv = parameter->getScaledInput(arcStart, arcEnd);
-        Point p = box.getCentre();        
-
-        for (i = v; i > arcEnd; i--)
-            _lcd->fillCircle((radius * (icos(i))) + p.x, -(radius * (isin(i))) + p.y - 2, thickness / 2, color.control);
-
-        for (i = arcStart; i > v; i--)
-            _lcd->fillCircle((radius * (icos(i))) + p.x, -(radius * (isin(i))) + p.y - 2, thickness / 2, color.controlValue);
-
-        if (iv != v)
-            _lcd->fillCircle((radius * (icos(iv))) + p.x, -(radius * (isin(iv))) + p.y - 2, thickness / 2, ILI9341_WHITE);
-
-        String newString = String((int)parameter->getValue()) + parameter->units;
-
-        if (lastValue.length() > 0)
-            drawText(p.x, p.y + box.height / 2 - 4, lastValue, FONT_UI_PARAMETER, ILI9341_BLACK);
-        drawText(p.x, p.y + box.height / 2 - 4, newString, FONT_UI_PARAMETER, color.textHighlighted);
-        lastValue = newString;
-    }
-
     // int sinInc(int degrees)
     // {
     //     sinDegrees = (sinDegrees + degrees) % 180;
@@ -85,7 +62,41 @@ private:
     const float arcSweep = 270;
     const float arcStart = 180.0 + 90.0 - ((360.0 - arcSweep) / 2.0);
     const float arcEnd = -(90.0 - (360.0 - arcSweep) / 2.0);
-    const float thickness = 2;    
+    const float thickness = 2;
+
+    void drawDial()
+    {
+        int v = parameter->getScaled(arcStart, arcEnd);
+        int iv = parameter->getScaledInput(arcStart, arcEnd);
+        Point p = box.getCentre();
+
+        drawArc(p, v, arcEnd, color.control);
+        drawArc(p, arcStart, v, color.controlValue);
+        if (iv != v)
+            drawInputPositionMarker(iv, p);
+
+        String newString = String((int)parameter->getValue()) + parameter->units;
+
+        if (lastValue.length() > 0)
+            drawText(p.x, p.y + box.height / 2 - 4, lastValue, FONT_UI_PARAMETER, ILI9341_BLACK);
+        drawText(p.x, p.y + box.height / 2 - 4, newString, FONT_UI_PARAMETER, color.textHighlighted);
+        lastValue = newString;
+    }
+
+    void drawArc(Point p, int arcEnd, int arcStart, uint16_t color)
+    {
+        for (int i = arcEnd; i > arcStart; i--)
+        {
+            Point point((radius * (icos(i))) + p.x, -(radius * (isin(i))) + p.y - 2);
+            _lcd->fillCircle(point.x, point.y, thickness / 2, color);
+        }
+    }
+
+    void drawInputPositionMarker(int inputValue, Point p, uint16_t color = ILI9341_WHITE)
+    {   
+        Point point((radius * (icos(inputValue))) + p.x, -(radius * (isin(inputValue))) + p.y - 2);
+        _lcd->fillCircle(point.x, point.y, thickness / 2, ILI9341_WHITE);
+    }
 };
 
 #endif

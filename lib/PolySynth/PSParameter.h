@@ -50,32 +50,34 @@ public:
         setValue(_value);
     }
 
-    bool setValue(float value)
+    bool setValue(float value, bool force = false)
     {
         float inputPos = clamp(value, _rangeMin, _rangeMax);
 
-        if (firstUpdate)
+        if (!force)
         {
-            lastInputPos = inputPos;
-            firstUpdate = false;
-            _didChange = true;
-            return true;
+            if (firstUpdate)
+            {
+                lastInputPos = inputPos;
+                firstUpdate = false;
+                _didChange = true;
+                return true;
+            }
+
+            if (inputPos == lastInputPos)
+                return false;
         }
-
-        if (inputPos == lastInputPos)
-            return false;
-
-        if (isTracking)
+        if (force || isTracking)
         {
             lastInputPos = inputPos;
-            _value = inputPos;            
+            _value = inputPos;
         }
         else
         {
-            if ((lastInputPos < _value && inputPos >= _value) || (lastInputPos > _value && inputPos <= _value))
+            if ((lastInputPos <= _value && inputPos >= _value) || (lastInputPos >= _value && inputPos <= _value))
             {
-                isTracking = true;                
-            }            
+                isTracking = true;
+            }
             lastInputPos = inputPos;
         }
         _didChange = true;
@@ -107,6 +109,8 @@ public:
         _active = true;
     }
     void deactivate() { _active = false; }
+
+    void markChanged() { _didChange = true; }
 
 private:
     float _value, _rangeMin, _rangeMax;

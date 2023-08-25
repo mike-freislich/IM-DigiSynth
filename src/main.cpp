@@ -1,3 +1,5 @@
+// #include "TeensyDebug.h"
+// #pragma GCC optimize ("O0")
 #include <Audio.h>
 #include <Wire.h>
 #include <SD.h>
@@ -23,6 +25,7 @@ void onDisplayUpdateTouch();
 void onSerialLogTimer();
 void monitorPeakOutput();
 void playStep(SeqStep *_steps[SEQ_TRACKS]);
+void onSaveTimer();
 
 Controls controls;
 PolySynth polySynth = PolySynth();
@@ -31,6 +34,8 @@ DSDisplay display = DSDisplay(onDisplayUpdateTouch, &polySynth, &controls);
 
 SimpleTimer displayRefreshTimer(1000 / SCREEN_REFRESH_RATE, refreshDisplay);
 SimpleTimer audioOutPollTimer(1000 / SCREEN_REFRESH_RATE, monitorPeakOutput);
+SimpleTimer saveTimer(10000, onSaveTimer);
+
 #ifdef USB_MIDI_AUDIO_SERIAL
 SimpleTimer serialLogTimer(10000, onSerialLogTimer);
 
@@ -68,10 +73,13 @@ FLASHMEM void setup()
 #endif
 
   polySynth.init();
-  String data = polySynth.voice1.toString();
-  Serial.println("-------------");
-  Serial.println(data);
-  Serial.println("-------------");
+  //String data = polySynth.voice1.toString();
+  //Serial.println("-------------");
+  //Serial.println(data);
+  //Serial.println("-------------");
+
+  polySynth.loadPatch(0);
+  Serial.println(polySynth.voice1.toString());
 
   seq.setTempo(SEQ_TEMPO, 8);
   seq.play();
@@ -97,7 +105,12 @@ FLASHMEM void loop()
   displayRefreshTimer.update();
   audioOutPollTimer.update();
   controls.update();
+
+  if (controls.buttons[0].didLongPress())
+    polySynth.savePatch(0);
+
   serialLogTimer.update();
+  // saveTimer.update();
 }
 
 extern float tempmonGetTemp(void);
@@ -108,17 +121,17 @@ void onSerialLogTimer()
   float cpu = AudioProcessorUsage();
   float maxCpu = AudioProcessorUsageMax();
 
-  printf("cpu %.2f\tmax %.2f\ttemp %2.f°C\t", cpu, maxCpu, tempmonGetTemp());
+  printf(", cpu %2.2f, max %2.2f, temp %2.1f°C", cpu, maxCpu, tempmonGetTemp());
 
   for (int i = 0; i < NUMPOTS; i++)
   {
     Potentiometer *p = &controls.pots[i];
-    printf("pot %d = %d\t", p->getPin(), p->getValue());
+    printf(", pot[%2d] %3d", p->getPin(), p->getValue());
   }
   for (int i = 0; i < NUMBUTTONS; i++)
   {
     Button *b = &controls.buttons[i];
-    printf("button %d = %d\t", b->getPin(), b->getValue());
+    printf(", button[%2d] %d", b->getPin(), b->getValue());
   }
 
   Serial.print("\n");
@@ -136,4 +149,9 @@ FLASHMEM void playStep(SeqStep *steps[SEQ_TRACKS])
     if (i == 0)
       polySynth.playNote(steps[i]->midiNote, steps[i]->velocity);
   }
+}
+
+FLASHMEM void onSaveTimer()
+{
+  // polySynth.savePatch(0);
 }

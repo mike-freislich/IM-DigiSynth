@@ -109,7 +109,7 @@ void testTracks()
 #define SEQ_GATE_MS 64
 #define SEQ_TRACKS 4
 #define SEQ_STEPS 16
-#define SEQ_TEMPO 10
+#define SEQ_TEMPO 70
 
 const float SeqDivValues[13] PROGMEM = {
     2.00000000f,

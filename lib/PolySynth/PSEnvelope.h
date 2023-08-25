@@ -35,27 +35,25 @@ public:
         _connections.push_back(new AudioConnection(*_envelope, 0, *dest, channel));
     }
 
-    FLASHMEM void updateAudioStreamComponent()
-    {
+    void updateAudioStreamComponent() override
+    {        
         _envelope->attack(params[PSP_ENV_ATTACK]->getValue());
         _envelope->decay(params[PSP_ENV_DECAY]->getValue());
-        _envelope->sustain(params[PSP_ENV_SUSTAIN]->getValue());
+        _envelope->sustain(params[PSP_ENV_SUSTAIN]->getValue()/100);
         _envelope->release(params[PSP_ENV_RELEASE]->getValue());
         _envelope->delay(params[PSP_ENV_DELAY]->getValue());
         _envelope->hold(params[PSP_ENV_HOLD]->getValue());
     }
 
-    FLASHMEM void noteOn()
-    {
-        _envelope->noteOn();
-    }
+    FLASHMEM void noteOn() { _envelope->noteOn(); }
+    FLASHMEM void noteOff() { _envelope->noteOff(); }
 
     /*
      * PSEnvelope::update()
      * If any parameters for the envelope changed,
      * copy to the AudioEnvelope 
      */
-    bool update()
+    bool update() override
     {
         // update from controllers
         bool updated = false;
