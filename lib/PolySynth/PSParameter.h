@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "controls.h"
+#include "PSMaths.h"
 #include <vector>
 
 class PSParameter;
@@ -115,8 +116,6 @@ public:
 private:
     float _value, _rangeMin, _rangeMax;
 
-    template <typename T>
-    T clamp(T value, T minVal, T maxVal) { return max(minVal, min(value, maxVal)); }
     InputBase *_controller = nullptr;
     bool isTracking = false;
     float trackingTarget = 0;

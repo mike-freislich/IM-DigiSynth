@@ -27,7 +27,6 @@ void monitorPeakOutput();
 void playStep(SeqStep *_steps[SEQ_TRACKS]);
 void onSaveTimer();
 
-Controls controls;
 PolySynth polySynth = PolySynth();
 Sequencer seq = Sequencer(playStep);
 DSDisplay display = DSDisplay(onDisplayUpdateTouch, &polySynth, &controls);

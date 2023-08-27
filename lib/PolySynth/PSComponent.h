@@ -155,6 +155,7 @@ public:
             }
         }
 
+        // TODO this is finding all child components each time. Perhaps split data string that is handed to children?
         // find all component blocks and pass them to each valid component
         if (children.size() > 0)
         {

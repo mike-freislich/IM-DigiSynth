@@ -11,7 +11,7 @@
 #include "PolySynth.h"
 #include "PSVoice.h"
 #include "PSParameter.h"
-#include "DSParameterElement.h"
+#include "DSParameterDial.h"
 
 class DSSceneEnvelope : public DSScene
 {
@@ -45,7 +45,7 @@ public:
         PSParameter *p = _envelope->params[paramType];
         if (potNum != -1)
             p->attachController((InputBase *)&_controls->pots[potNum]);
-        addElement(new DSParameterElement(_lcd, p, _thisElement));
+        addElement(new DSParameterDial(_lcd, p, _thisElement));
     }
 
     void render()

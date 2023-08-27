@@ -1,5 +1,5 @@
-#ifndef DS_PARAMETERELEMENT_H
-#define DS_PARAMETERELEMENT_H
+#ifndef DS_PARAMETERDIAL_H
+#define DS_PARAMETERDIAL_H
 
 #include "DSElement.h"
 #include "PSParameter.h"
@@ -11,10 +11,10 @@
 #define PARM_SUSTAIN 3
 #define PARM_RELEASE 4
 
-class DSParameterElement : public DSElement, public Docker
+class DSParameterDial : public DSElement, public Docker
 {
 public:
-    DSParameterElement(ILI9341_t3n *lcd, PSParameter *parm, DSElement *parent = nullptr)
+    DSParameterDial(ILI9341_t3n *lcd, PSParameter *parm, DSElement *parent = nullptr)
         : DSElement(lcd, parm->name, Rect(0, 0, 50, 50), parent), Docker(DockPositionX::xNone, DockPositionY::yNone)
     {
         color.fill = 0;
@@ -36,7 +36,7 @@ public:
 
         this->addElement(l);
     }
-    ~DSParameterElement() {}
+    ~DSParameterDial() {}
 
     void render()
     {

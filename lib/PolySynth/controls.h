@@ -2,19 +2,27 @@
 #define DS_CONTROLS_H
 
 #include <Arduino.h>
+#include "PSMaths.h"
 
 #define NUMPOTS 4
 #define POT_AVERAGE_SAMPLING 16
 #define POT_RESOLUTION 4
 #define POT_RANGE_MIN 0
 #define POT_RANGE_MAX 980
-#define PIN_POTA A0
-#define PIN_POTB A1
-#define PIN_POTC A2
-#define PIN_POTD A3
-
-#define NUMBUTTONS 1
-#define PIN_ROTARY_BUTTONA A17
+#define PIN_POTA A3
+#define PIN_POTB A2
+#define PIN_POTC A0
+#define PIN_POTD A1
+#define NUMBUTTONS 4
+#define PIN_TACTBUTTON_1 A8
+#define PIN_TACTBUTTON_2 A9
+#define PIN_ROTARY1_BUTTON A16
+#define PIN_ROTARY2_BUTTON A17
+#define NUMENCODERS 2
+#define PIN_ENC1_A A5
+#define PIN_ENC1_B A4
+#define PIN_ENC2_A A7
+#define PIN_ENC2_B A6
 
 enum ControllerType
 {
@@ -120,9 +128,9 @@ public:
     bool pressed() { return getValue(); }
     float getValue() override { return (_value == LOW); }
 
-    bool didLongPress(uint16_t duration = 1000)
+    FLASHMEM bool didLongPress(uint16_t duration = 1000)
     {
-        //Serial.printf("didLongPress %d\n", duration);
+        // Serial.printf("didLongPress %d\n", duration);
         if (_didRelease)
         {
             _didRelease = false;
@@ -132,25 +140,20 @@ public:
         return false;
     }
 
-    bool setValue(int value)
+    FLASHMEM bool setValue(int value)
     {
         if (value != _value && debounced())
         {
-
-            //Serial.println(value);
             _value = value;
             if (pressed())
             {
-                //Serial.println("pressed");
                 pressedTime = millis();
                 releaseDuration = 0;
                 _didRelease = false;
             }
             else
             {
-
                 releaseDuration = millis() - pressedTime;
-                //Serial.printf("released after %d\n", releaseDuration);
                 _didRelease = true;
             }
 
@@ -167,6 +170,89 @@ protected:
     bool _didRelease = false;
 };
 
+static const int8_t enc_states[] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0}; // Lookup table
+
+class Encoder : public InputBase
+{
+public:
+    Encoder(uint8_t pinA, uint8_t pinB, void (*isrA)(), void (*isrB)())
+    {
+        controllerType = ControllerType::CT_ROTARY;
+        _pinA = pinA;
+        _pinB = pinB;
+        pinMode(pinA, INPUT_PULLUP);
+        pinMode(pinB, INPUT_PULLUP);
+        attachInterrupt(_pinA, isrA, CHANGE);
+        attachInterrupt(_pinB, isrB, CHANGE);
+    }
+
+    void setRange(int rangeMin, int rangeMax)
+    {
+        _value = clamp(_value, rangeMin, rangeMax);
+        _analogMax = rangeMax;
+        _analogMin = rangeMin;
+    }
+
+    int getPosition()
+    {
+        return _value;
+    }
+
+    void isrA()
+    {
+        if (rotating)
+            delayMicroseconds(1000);
+        if (digitalRead(_pinA) != encA_set)
+        {
+            encA_set = !encA_set;
+            if (encA_set && !encB_set)
+                counter++;
+            rotating = false;
+        }
+    }
+    
+    void isrB()
+    {
+        if (rotating)
+            delayMicroseconds(1000);
+        if (digitalRead(_pinB) != encB_set)
+        {
+            encB_set = !encB_set;
+            if (encB_set && !encA_set)
+                counter--;
+            rotating = false;
+        }
+    }
+
+    void update()
+    {
+        rotating = true; // reset the debouncer
+        if (counter != lastCounter)
+        {
+            if (counter > lastCounter)
+                _value++;
+            else if (counter < lastCounter)
+                _value--;
+            Serial.print("Index:");
+            Serial.println(_value, DEC);
+            lastCounter = counter;
+        }
+    }
+
+protected:
+    uint8_t _pinA, _pinB;
+    const uint32_t _pauseLength = 100000;
+    volatile uint32_t _lastISRChanged = 0;
+    volatile int counter = 0;
+    volatile bool encA_set, encB_set, rotating;
+    int lastCounter = 0;
+};
+
+static void encoder1ISRA();
+static void encoder1ISRB();
+static void encoder2ISRA();
+static void encoder2ISRB();
+
 class Controls
 {
 public:
@@ -177,7 +263,14 @@ public:
         Potentiometer(PIN_POTD)};
 
     Button buttons[NUMBUTTONS] = {
-        Button(PIN_ROTARY_BUTTONA)};
+        Button(PIN_ROTARY1_BUTTON),
+        Button(PIN_ROTARY2_BUTTON),
+        Button(PIN_TACTBUTTON_1),
+        Button(PIN_TACTBUTTON_2)};
+
+    Encoder encoders[NUMENCODERS] = {
+        Encoder(PIN_ENC1_A, PIN_ENC1_B, encoder1ISRA, encoder1ISRB),
+        Encoder(PIN_ENC2_A, PIN_ENC2_B, encoder2ISRA, encoder2ISRB)};
 
     Controls() { analogReadAveraging(POT_AVERAGE_SAMPLING); }
 
@@ -185,6 +278,7 @@ public:
     {
         updatePots();
         updateButtons();
+        updateEncoders();
     }
 
 protected:
@@ -198,6 +292,17 @@ protected:
         for (int i = 0; i < NUMBUTTONS; i++)
             buttons[i].update();
     }
+    void updateEncoders()
+    {
+        for (int i = 0; i < NUMENCODERS; i++)
+            encoders[i].update();
+    }
 };
+
+Controls controls;
+static void encoder1ISRA() { controls.encoders[0].isrA(); }
+static void encoder1ISRB() { controls.encoders[0].isrB(); }
+static void encoder2ISRA() { controls.encoders[1].isrA(); }
+static void encoder2ISRB() { controls.encoders[1].isrB(); }
 
 #endif

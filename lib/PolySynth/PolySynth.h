@@ -13,17 +13,12 @@
 #include "PSDCO.h"
 #include "PSEnvelope.h"
 #include "PSVoice.h"
+#include "waves.h"
+#include "PSMaths.h"
 
 #define AMPLITUDE (1.0)
 
-const uint8_t waves[] = {
-    WAVEFORM_SINE,
-    WAVEFORM_TRIANGLE,
-    WAVEFORM_SAWTOOTH,
-    WAVEFORM_SQUARE,
-    WAVEFORM_PULSE
-    //WAVEFORM_SAMPLE_HOLD
-};
+
 
 const float noteFreqs[128] PROGMEM = {
     8.176f, 8.662f, 9.177f, 9.723f, 10.301f,
@@ -273,8 +268,8 @@ public:
     // left = -1.0, centre = 0, right = 1.0;
     FLASHMEM void pan(uint8_t osc, float value)
     {
-        osc = clamp(osc, 0, 1);
-        value = clamp(value, -1, 1);
+        osc = clamp(osc, (uint8_t)0, (uint8_t)1);
+        value = clamp(value, (float)-1, (float)1);
 
         // float balanceFactorRight = (_balance + 1) / 2;
         // float balanceFactorLeft = 1 - balanceFactorRight;
@@ -288,7 +283,7 @@ public:
 
     FLASHMEM void balance(float value)
     {
-        _balance = clamp(value, -1, 1);
+        _balance = clamp(value, (float)-1.0, (float)1.0);
     }
 
     FLASHMEM void ringMod(float amount, float freq = 10, uint8_t waveform = WAVEFORM_SINE)
@@ -299,7 +294,7 @@ public:
 
     FLASHMEM void xmod(uint8_t osc, float amount)
     {
-        osc = clamp(osc, 0, 1);
+        osc = clamp(osc, (uint8_t)0, (uint8_t)1);
         if (osc == 0)
             osc1XMODamt.amplitude(amount);
         else
@@ -335,12 +330,6 @@ private:
     //     return a;
     // }
 
-    FLASHMEM float clamp(float a, float minValue, float maxValue)
-    {
-        a = max(a, minValue);
-        a = min(a, maxValue);
-        return a;
-    }
 };
 
 #endif
