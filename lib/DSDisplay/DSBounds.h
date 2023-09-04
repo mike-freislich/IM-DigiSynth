@@ -53,11 +53,12 @@ public:
     Point getBoundsPosition() { return Point(boundsRect.x, boundsRect.y); }
     Point getCentre() { return Point(boundsRect.x + boundsRect.width / 2, boundsRect.y + boundsRect.height / 2); }
 
-    void dock(DockPosH dpx, DockPosV dpy, uint8_t marginH = 0)
+    void dock(DockPosH dpx, DockPosV dpy, uint8_t marginH = 0, uint8_t marginV = 0)
     {
         dockPosH = dpx;
         dockPosV = dpy;
         this->marginH = marginH;
+        this->marginV = marginV;
     }
 
     Rect dockedBounds()
@@ -73,11 +74,11 @@ public:
                 r.x += coordinateSpace->boundsRect.width - boundsRect.width - marginH;
 
             if (dockPosV == DockPosV::top)
-                r.y += 0;
+                r.y += marginV;
             else if (dockPosV == DockPosV::middle)
                 r.y += coordinateSpace->boundsRect.height / 2 - boundsRect.height / 2;
             else if (dockPosV == DockPosV::bottom)
-                r.y += coordinateSpace->boundsRect.height - boundsRect.height;
+                r.y += coordinateSpace->boundsRect.height - boundsRect.height - marginV;
         }
         return r;
     }
@@ -86,7 +87,7 @@ private:
     DSBounds *coordinateSpace = nullptr;
     DockPosH dockPosH = noneH;
     DockPosV dockPosV = noneV;
-    uint8_t marginH = 0;
+    uint8_t marginH = 0, marginV = 0;
 
     Rect getBoundsAsCoordinateSpace()
     {

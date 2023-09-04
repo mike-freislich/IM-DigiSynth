@@ -92,7 +92,7 @@ protected:
             {
                 Rect bb = e->dockedBounds();
                 e->setBoundsPosition(xmargin + i * horizontalSpacing, 0);//this->height() - bb.height - ymargin);
-                e->dock(noneH, bottom,20);
+                e->dock(noneH, bottom, 0, 10);
                 i++;
             }
         }
