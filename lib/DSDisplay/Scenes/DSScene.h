@@ -4,43 +4,44 @@
 #include <ILI9341_t3n.h>
 #include <vector>
 #include <XPT2046_Touchscreen.h>
-#include <DSElement.h>
+
 #include <DSButton.h>
 #include <DSPanel.h>
 #include <DSLabel.h>
+
 #include <DSVerticalMeter.h>
 #include <DSColor.h>
 #include "PSParameter.h"
+#include <DSBounds.h>
 
-class DSScene
+class DSScene : public DSBounds
 {
 
 public:
-    DSScene(ILI9341_t3n *lcd) : _lcd(lcd)
+    DSScene(ILI9341_t3n *lcd) : DSBounds()
     {
-        DSElement *panel = new DSPanel(_lcd, "TOPBAR", Rect(2, 0, 318, 25), DSElement::Color(COLOR_BORDER, COLOR_HEADING_FILL, COLOR_BACKGROUND));
-        DSElement *heading = new DSLabel(_lcd, ".", DSElement::Color(0, 0, ILI9341_WHITE));
+        _lcd = lcd;
+        int offsetx = 3;
+        setBounds(offsetx, 0, lcd->width() - offsetx, lcd->height());
 
-        heading->setFont(FONT_UI_HEADING);
-        heading->setAnchors(AnchorPosition(left, middle));
-        _sceneName = heading;
-        panel->addElement(heading);
-        _verticalMeter = new DSVerticalMeter(_lcd, "", panel);
-        panel->addElement(_verticalMeter);
+        DSElement *panel = new DSPanel(_lcd, "TOPBAR", Dimensions(this->getBounds().width, 25), this);
         addElement(panel);
+
+        _sceneName = new DSLabel(_lcd, ".");
+        _sceneName->setFont(FONT_UI_HEADING);
+        _sceneName->dock(left, middle, 3);
+        panel->addChild(_sceneName);
+
+        _verticalMeter = new DSVerticalMeter(_lcd, "");
+        _verticalMeter->setBounds(Rect(0, 0, 25, 25));
+        panel->addChild(_verticalMeter);
+        _verticalMeter->dock(right, middle);
     }
 
-    DSVerticalMeter *getAudioMeter()
-    {
-        return _verticalMeter;
-    }
+    DSVerticalMeter *getAudioMeter() { return _verticalMeter; }
+    virtual ~DSScene() { elements.clear(); }
 
-    virtual ~DSScene()
-    {
-        elements.clear();
-    };
-
-    void render()
+    virtual void render()
     {
         if (visible)
         {
@@ -51,20 +52,10 @@ public:
 
     DSElement *addElement(DSElement *element)
     {
-        element->setShouldRedraw(true);
+        element->setDidChange();
+        element->attachToSpace((DSBounds *)this);
         elements.push_back(element);
         return element;
-    }
-
-    void update(TS_Point point)
-    {
-        for (auto e : elements)
-        {
-            if (e->isPointInElement(point))
-            {
-                // Serial.printf(" %d \n");
-            }
-        }
     }
 
     void clear()
@@ -73,41 +64,41 @@ public:
         {
             for (auto e : elements)
             {
-                e->setShouldRedraw(true);
+                e->setDidChange();
             }
         }
         _lcd->fillScreen(color.background);
     }
 
-    void setSceneName(String name)
-    {
-        _sceneName->setLabel(name);
-    }
-
-    uint16_t width()
-    {
-        return _lcd->height();
-    }
-
-    uint16_t height()
-    {
-        return _lcd->width();
-    }
-
+    void setSceneName(String name) { _sceneName->setName(name); }
+    uint16_t width() { return _lcd->height(); }
+    uint16_t height() { return _lcd->width(); }
     PSParameterVector getParameters() { return _parms; };
 
     DSElement *getElement(String s)
     {
         for (auto e : elements)
         {
-            if (e->getLabel() == s)
+            if (e->getName() == s)
                 return e;
         }
         return nullptr;
     }
 
-    virtual void show() { visible = true; }
-    virtual void hide() { visible = false; }
+    virtual void show()
+    {
+        visible = true;
+        for (auto e : elements)
+            e->show();
+    }
+
+    virtual void hide()
+    {
+        visible = false;
+        for (auto e : elements)
+            e->hide();
+    }
+
     virtual bool isVisible() { return visible; }
 
 protected:
@@ -123,6 +114,6 @@ protected:
     bool visible = false;
 };
 
-typedef vector<DSScene *> DSSceneVector;
+typedef std::vector<DSScene *> DSSceneVector;
 
 #endif

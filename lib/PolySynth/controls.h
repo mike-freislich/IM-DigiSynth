@@ -65,6 +65,7 @@ public:
 
     virtual void update() {}
     virtual float getValue() { return _value; }
+    virtual void setValue(float value) { _value = value; }
 
     uint8_t getPin() { return _pin; }
     float getAnalogMin() { return _analogMin; }
@@ -190,7 +191,7 @@ public:
     {
         _value = clamp(_value, rangeMin, rangeMax);
         _analogMax = rangeMax;
-        _analogMin = rangeMin;
+        _analogMin = rangeMin;        
     }
 
     int getPosition()
@@ -224,6 +225,11 @@ public:
         }
     }
 
+    void setValue(float value) override
+    {
+        _value = value;        
+    }
+
     void update()
     {
         rotating = true; // reset the debouncer
@@ -233,9 +239,13 @@ public:
                 _value++;
             else if (counter < lastCounter)
                 _value--;
-            Serial.print("Index:");
-            Serial.println(_value, DEC);
-            lastCounter = counter;
+
+            if (_analogMax != _analogMin)
+                _value = clamp(_value, _analogMin, _analogMax);
+            //Serial.printf("range set : min %d, max %d\n", _analogMin, _analogMax);
+            //Serial.print("Index:");
+            //Serial.println(_value, DEC);
+            lastCounter = counter; 
         }
     }
 

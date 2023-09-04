@@ -9,24 +9,23 @@ class DSPanel : public DSElement
 {
 protected:
 public:
-    DSPanel(ILI9341_t3n *lcd, String label, Rect boundingBox,
-            Color elementColor = Color(COLOR_BACKGROUND, COLOR_TOP_PANEL, ILI9341_WHITE)) : DSElement(lcd, label, boundingBox)
+    DSPanel(ILI9341_t3n *lcd, String name, Dimensions dimensions, DSBounds *parentSpace = nullptr) : DSElement(lcd, name)
     {
-        setColors(elementColor);
+        color.background = COLOR_TOP_PANEL;
+        setBounds(Rect(0,0,dimensions.width, dimensions.height));
+        if (parentSpace != nullptr)
+            attachToSpace(parentSpace);
     }
 
-    ~DSPanel()
+    void render() override
     {
-    }
-
-    void render()
-    {
-        if (getShouldRedraw())
+        if (visible && didChange)
         {
-            drawBackground();
+            this->drawBackground();
         }
         DSElement::render();
     }
+
 };
 
 #endif

@@ -7,7 +7,7 @@
 #include <vector>
 
 class PSParameter;
-typedef vector<PSParameter *> PSParameterVector;
+typedef std::vector<PSParameter *> PSParameterVector;
 
 class PSParameter
 {

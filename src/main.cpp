@@ -5,6 +5,7 @@
 #include <SD.h>
 #include <SPI.h>
 #include <SerialFlash.h>
+
 #include <DSDisplay.h>
 #include <SimpleTimer.h>
 #include "DSSequencer.h"
@@ -19,13 +20,13 @@
 #define ARDUINO_SERIAL_DELAY 10000
 #define SCENE_DELAY 5000
 
-void nextScene();
+//void nextScene();
 void refreshDisplay();
 void onDisplayUpdateTouch();
 void onSerialLogTimer();
 void monitorPeakOutput();
 void playStep(SeqStep *_steps[SEQ_TRACKS]);
-void onSaveTimer();
+
 
 PolySynth polySynth = PolySynth();
 Sequencer seq = Sequencer(playStep);
@@ -33,7 +34,6 @@ DSDisplay display = DSDisplay(onDisplayUpdateTouch, &polySynth, &controls);
 
 SimpleTimer displayRefreshTimer(1000 / SCREEN_REFRESH_RATE, refreshDisplay);
 SimpleTimer audioOutPollTimer(1000 / SCREEN_REFRESH_RATE, monitorPeakOutput);
-SimpleTimer saveTimer(10000, onSaveTimer);
 
 #ifdef USB_MIDI_AUDIO_SERIAL
 SimpleTimer serialLogTimer(10000, onSerialLogTimer);
@@ -61,35 +61,26 @@ FLASHMEM void setup()
   Serial.begin(115200);
 #endif
   display.begin();
-  display.clearScreen(ILI9341_BLACK);
-
+  display.setupScenes();
 #ifdef USB_MIDI_AUDIO_SERIAL
   delayForSerial();
 #endif
-
 #ifdef RUNTESTS
   runTests();
 #endif
-
   polySynth.init();
-  //String data = polySynth.voice1.toString();
-  //Serial.println("-------------");
-  //Serial.println(data);
-  //Serial.println("-------------");
-
   polySynth.loadPatch(0);
-  Serial.println(polySynth.voice1.toString());
-
+  //Serial.println(polySynth.voice1.toString());
   seq.setTempo(SEQ_TEMPO, 8);
   seq.play();
   display.nextScene();
   threads.addThread(synthLoop);
 }
 
-void nextScene()
-{
-  display.nextScene();
-}
+// FLASHMEM void nextScene()
+// {
+//   display.nextScene();
+// }
 
 void refreshDisplay() { display.render(); }
 
@@ -108,8 +99,9 @@ FLASHMEM void loop()
   if (controls.buttons[0].didLongPress())
     polySynth.savePatch(0);
 
-  serialLogTimer.update();
-  // saveTimer.update();
+  serialLogTimer.update();  
+
+  delay(1);
 }
 
 extern float tempmonGetTemp(void);
@@ -138,7 +130,7 @@ void onSerialLogTimer()
 
 void onDisplayUpdateTouch()
 {
-  display.update();
+  display.updateTouch();
 }
 
 FLASHMEM void playStep(SeqStep *steps[SEQ_TRACKS])
@@ -148,9 +140,4 @@ FLASHMEM void playStep(SeqStep *steps[SEQ_TRACKS])
     if (i == 0)
       polySynth.playNote(steps[i]->midiNote, steps[i]->velocity);
   }
-}
-
-FLASHMEM void onSaveTimer()
-{
-  // polySynth.savePatch(0);
 }

@@ -10,22 +10,23 @@
 class DSEnvelopeGraph : public DSElement
 {
 public:
-    DSEnvelopeGraph(ILI9341_t3n *lcd, String label, PSParameterVector plist, DSElement *parent = nullptr)
-        : DSElement(lcd, label, Rect(3, 25, 317, 150), parent)
+    DSEnvelopeGraph(ILI9341_t3n *lcd, String label, PSParameterVector plist)
+        : DSElement(lcd, label)
     {
+        setBounds(Rect(0,25,317,150));
         _parms = plist;        
-        color.border = ILI9341_WHITE;
-        color.fill = ILI9341_BLACK;
+        color.border = ILI9341_WHITE;        
+        color.background = ILI9341_BLACK;
         color.control = ILI9341_WHITE;
-        color.controlValue = ILI9341_GREENYELLOW;
-        this->_updateDelay = 1000 / 30; // 15 FPS max
+        color.controlValue = ILI9341_GREENYELLOW;        
+        //this->_updateDelay = 1000 / 30; // 15 FPS max
     }
 
     ~DSEnvelopeGraph() { DSElement::~DSElement(); }
 
     void render()
     {
-        if (this->getShouldRedraw() && this->updateTimerReady())
+        if (didChange && visible)
         {
             drawBorder();
             drawGraph();
@@ -33,23 +34,23 @@ public:
         }
     }
 
-    // void clear() {
-    //     drawGraph(true);
-    //     setShouldRedraw(true);
-    // }
-
     void drawGraph()
     {
         // set up the graph area
         const float sustainArea = 0.2;
         const uint8_t padding = 6;
-        Rect gbox(box.x + padding, box.y + padding, box.width - padding * 2, box.height - padding * 2);
+        
+        Rect gbox = dockedBounds();
+        gbox.x += padding;
+        gbox.y += padding;
+        gbox.width -= padding * 2;
+        gbox.height -= padding * 2;
 
         // calculate the total milliseconds in the envelope (sustain is 0)
         float totalMillis = _parms[PSP_ENV_ATTACK]->getMax() + _parms[PSP_ENV_HOLD]->getMax() + _parms[PSP_ENV_DECAY]->getMax() + _parms[PSP_ENV_RELEASE]->getMax();
 
         uint16_t lineColor, dotColor;
-        if (getShouldRedraw() && polyLine != nullptr)
+        if (didChange && polyLine != nullptr)
         {
             lineColor = 0;
             dotColor = 0;
@@ -77,14 +78,14 @@ public:
         for (int i = 0; i < polyLine->lineCount; i++)
         {
             l = polyLine->lineAtIndex(i);
-            _lcd->drawLine(l.start.x, l.start.y, l.end.x, l.end.y, lineColor);
-            _lcd->fillCircle(l.start.x, l.start.y, 3, dotColor);
+            lcd->drawLine(l.start.x, l.start.y, l.end.x, l.end.y, lineColor);
+            lcd->fillCircle(l.start.x, l.start.y, 3, dotColor);
         }
-        _lcd->fillCircle(l.end.x, l.end.y, 3, dotColor);
+        lcd->fillCircle(l.end.x, l.end.y, 3, dotColor);
 
-        if (getShouldRedraw())
+        if (didChange)
         {
-            setShouldRedraw(false);
+            didChange = false;
             drawGraph();
         }
     }
@@ -92,7 +93,7 @@ public:
 protected:
 private:
     PSParameterVector _parms;
-    PolyLine *polyLine = nullptr;
+    PolyLine *polyLine = nullptr;    
 };
 
 #endif

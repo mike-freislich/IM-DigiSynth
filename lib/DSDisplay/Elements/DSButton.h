@@ -2,31 +2,23 @@
 #define DSBUTTON_H
 
 #include <DSElement.h>
+#include <DSColor.h>
 #include <ILI9341_t3n.h>
 
 class DSButton : public DSElement
 {
 public:
-    DSButton(ILI9341_t3n *lcd, String label, Rect boundingBox,
-             Color elementColor = Color(0, ILI9341_WHITE, 0),
-             DSElement *parent = NULL) : DSElement(lcd, label, boundingBox, parent)
-    {
-        setColors(elementColor); 
-        _anchor.horizontal = centre;
+    DSButton(ILI9341_t3n *lcd, String name) : DSElement(lcd, name)             
+    {        
+        this->setBounds(Rect(0,0,50,25));                
     }
+
     ~DSButton()
     {
     }
 
-    void render()
-    {
-        if (getShouldRedraw())
-        {
-            drawBackground();
-            drawBorder();                        
-            drawLabel(box.getCentre());
-            setShouldRedraw(false);
-        }
+    void render() override
+    {        
         DSElement::render();
     }
 };

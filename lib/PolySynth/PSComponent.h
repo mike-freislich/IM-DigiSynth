@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "PSParameter.h"
+#include "patching.h"
 #include <vector>
 
 class PSComponent;
@@ -156,10 +157,10 @@ public:
         // Serial.printf("Component Block start %d, end %d\n", p, endIndex);
         if (endIndex < 0)
         {
-            Serial.println(F("Error loading data.. runaway component block"));
+            //Serial.println(F("Error loading data.. runaway component block"));
             return;
         }
-        Serial.printf(">>>>>> %s <<<<<<\n", componentName.c_str());
+        //Serial.printf(">>>>>> %s <<<<<<\n", componentName.c_str());
         p++;
         while (isWhitespace(cd[p]) && p < endIndex)
             p++;
@@ -177,7 +178,7 @@ public:
             return;
         // Serial.printf("nextComponent %d, endParameterBlock %d\n", nextComponent, endParameterBlock);=
         String pblock = data.substring(p, min(nextComponent, endParameterBlock));
-        Serial.printf("allocated pblock with %d characters\n", pblock.length());
+        //Serial.printf("allocated pblock with %d characters\n", pblock.length());
         if (pblock.length())
         {
             p = min(nextComponent, endParameterBlock);
@@ -192,7 +193,7 @@ public:
                 if (nameValuePair.size() == 2)
                 {
                     set(nameValuePair[0], nameValuePair[1].toFloat(), true);
-                    Serial.printf("setting %s->%s to %.2f\n", this->name.c_str(), nameValuePair[0].c_str(), nameValuePair[1].toFloat());
+                    //Serial.printf("setting %s->%s to %.2f\n", this->name.c_str(), nameValuePair[0].c_str(), nameValuePair[1].toFloat());
                 }
             }
         }
@@ -202,7 +203,7 @@ public:
         // find all component blocks and pass them to each valid component
         if (children.size() > 0)
         {
-            Serial.println("Finding child components");
+            //Serial.println("Finding child components");
             while (cd[p] != '\0' && p < endIndex)
             {
                 if (findNextIndexOf(cd, '*', p) != -1)
@@ -211,7 +212,7 @@ public:
                     String childComponentName = "";
                     if (findNextIndexOf(cd, '{', p, &childComponentName) != -1 && p < endIndex)
                     {
-                        Serial.printf("searching for child '%s'\n", childComponentName.c_str());
+                        //Serial.printf("searching for child '%s'\n", childComponentName.c_str());
                         for (uint8_t c = 0; c < children.size(); c++)
                         {
                             PSComponent *child = children[c];

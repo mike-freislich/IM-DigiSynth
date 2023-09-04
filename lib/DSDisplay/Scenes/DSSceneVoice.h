@@ -10,26 +10,25 @@ class DSSceneVoice : public DSScene
 {
 public:
     DSSceneVoice(ILI9341_t3n *lcd) : DSScene(lcd)
-    {
-        //DSElement::Color elementColor = DSElement::Color(COLOR_BORDER, ILI9341_WHITE, ILI9341_BLACK);                
+    {        
         color.background = 0;
-        this->setSceneName(String("VOICE"));
-
+        this->setSceneName(String("VOICE"));        
         scope = new DSOscilloscope(lcd, "scope");
-        scope->setScene(this);        
+        scope->setBoundsPosition(0, 110);
+        scope->dock(centre, noneV);    
         scope->inputConnection(&oscilloscopeMixer);
         oscilloscopeMixer.gain(0, 0.5);
-        oscilloscopeMixer.gain(1, 0.5);
-        addElement(scope);        
-    }
+        oscilloscopeMixer.gain(1, 0.5);        
+        addElement(scope);
 
-    ~DSSceneVoice()
-    {
-        DSScene::~DSScene();
-    }
+        DSPanel *stripe = new DSPanel(lcd, "", Dimensions(260, 5), this);
+        stripe->color.background = ILI9341_GREEN;        
+        stripe->setBoundsPosition(0, 100);
+        stripe->dock(centre, noneV);
+        stripe->show();       
+        addElement(stripe); 
+    }    
 
-
-    
 private:
     DSOscilloscope *scope;
 };

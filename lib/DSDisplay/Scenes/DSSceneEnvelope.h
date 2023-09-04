@@ -2,7 +2,7 @@
 #define DS_SCENENEVELOPE_H
 
 #include <Audio.h>
-#include <DSScene.h>
+#include <DSScenes.h>
 #include <DSButton.h>
 #include <DSColor.h>
 
@@ -13,15 +13,15 @@
 #include "PSParameter.h"
 #include "DSParameterDial.h"
 
-class DSSceneEnvelope : public DSScene
+class DSSceneEnvelope: public DSScene
 {
 public:
-    DSSceneEnvelope(ILI9341_t3n *lcd, String label, PSEnvelope *env, Controls *controls) : DSScene(lcd)
+    DSSceneEnvelope(ILI9341_t3n *lcd, String label, PSEnvelope *env, Controls *controls): DSScene(lcd)
     {
         _thisElement = (DSElement *)this;
         _envelope = env;
         _controls = controls;
-        color.background = 0;
+        color.background = 0;        
         setSceneName(label);
 
         addDial(PSP_ENV_ATTACK, 0);
@@ -48,7 +48,7 @@ public:
         addElement(new DSParameterDial(_lcd, p, _thisElement));
     }
 
-    void render()
+    void render() override
     {
         updateControls();
         DSScene::render();
@@ -58,9 +58,8 @@ public:
     {        
         if (visible)
         {
-            if (_envelope->update()) {                            
-                graph->setShouldRedraw(true);
-            }
+            if (_envelope->update())                           
+                graph->setDidChange();            
         }
     }
 
@@ -89,10 +88,11 @@ protected:
         int i = 0;
         for (auto e : elements)
         {
-            if (e->getLabel() == "PARM")
+            if (e->getName() == "PARM")
             {
-                Rect bb = e->getBoundingBox();
-                e->MoveTo(xmargin + i * horizontalSpacing, this->height() - bb.height - ymargin);
+                Rect bb = e->dockedBounds();
+                e->setBoundsPosition(xmargin + i * horizontalSpacing, 0);//this->height() - bb.height - ymargin);
+                e->dock(noneH, bottom,20);
                 i++;
             }
         }

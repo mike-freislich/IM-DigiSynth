@@ -3,33 +3,19 @@
 
 #include <DSElement.h>
 
-class DSVerticalMeter : public DSElement, public Docker
+class DSVerticalMeter : public DSElement
 {
 public:
-    DSVerticalMeter(
-        ILI9341_t3n *lcd, String(label), DSElement *parent = nullptr)
-        : DSElement(lcd, label, Rect(0, 0, 26, 23), parent), Docker(DockPositionX::right, DockPositionY::yCentre)
+    DSVerticalMeter(ILI9341_t3n *lcd, String name) : DSElement(lcd, name)
     {
-        // setColors(Color(ILI9341_BLACK, ILI9341_WHITE, ILI9341_BLACK));
-        color.border = _lcd->color565(80, 80, 255);
-        color.fill = _lcd->color565(0, 0, 0);
-        _anchor.horizontal = HorizontalPosition::left;
-        setDockOptions(DockPositionX::right, DockPositionY::yCentre);
+        color.border = lcd->color565(80, 80, 255);
+        color.background = lcd->color565(0, 0, 0);
     }
 
-    ~DSVerticalMeter()
+    void render() override
     {
-    }
-
-    void render()
-    {
-        if (getShouldRedraw())
+        if (visible && didChange)
         {
-            if (!docked)
-            {
-                dock(this, _parent);
-                docked = true;
-            }
             drawBackground();
             drawMeter();
             drawBorder();
@@ -49,7 +35,7 @@ public:
         {
             levelLeft = left;
             levelRight = right;
-            setShouldRedraw(true);
+            setDidChange();
         }
     }
 
@@ -61,6 +47,7 @@ protected:
 
     void drawMeter()
     {
+        Rect box = dockedBounds();
         float scaledLevels[] = {
             (levelLeft * (box.height - 1)),
             (levelRight * (box.height - 1))};
@@ -70,7 +57,7 @@ protected:
         int x = box.x + padding;
         for (int columnHeight : scaledLevels)
         {
-            _lcd->fillRect(
+            lcd->fillRect(
                 x, box.y + box.height - columnHeight, columnWidth, columnHeight, ILI9341_GREEN);
             x += columnWidth + padding;
         }

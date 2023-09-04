@@ -67,7 +67,14 @@
 			"stop_token": "cpp",
 			"thread": "cpp",
 			"variant": "cpp",
-			"iostream": "cpp"
+			"iostream": "cpp",
+			"csignal": "cpp",
+			"list": "cpp",
+			"map": "cpp",
+			"set": "cpp",
+			"unordered_set": "cpp",
+			"fstream": "cpp",
+			"iomanip": "cpp"
 		}
 	}
 }

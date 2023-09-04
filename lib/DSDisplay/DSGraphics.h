@@ -12,9 +12,16 @@ struct Point
     }
 };
 
+struct Dimensions
+{
+    int width, height;
+    Dimensions() {}
+    Dimensions(int width, int height) : width(width), height(height) {}    
+};
+
 struct Rect
 {
-    int x, y, width, height;
+    int x = 0, y = 0, width = 0, height = 0;
     Rect() {}
     Rect(int x, int y, int width, int height) : x(x), y(y), width(width), height(height){};
 

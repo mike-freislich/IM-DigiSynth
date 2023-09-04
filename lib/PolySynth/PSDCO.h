@@ -3,11 +3,13 @@
 
 #include "patching.h"
 #include "PSEnvelope.h"
+#include "waves.h"
 
 class PSDCO : public PSComponent
 {
 public:
     PSEnvelope *vca_env, *vcf_env, *mod_env;
+    
     
     PSDCO(String name, AudioEffectEnvelope *a_env, AudioEffectEnvelope *f_env, AudioEffectEnvelope *p_env)
         :PSComponent(name)
@@ -20,9 +22,7 @@ public:
         this->addChild(vcf_env);
         this->addChild(mod_env);
 
-        //vca_env->update(3, 130, 50, 15);
-        //vcf_env->update(3, 130, 50, 15);
-        //mod_env->update(3, 130, 50, 15);
+        addParameter("waveform", 1, 0, 11);
     }
     ~PSDCO() {}
 

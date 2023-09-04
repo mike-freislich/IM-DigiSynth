@@ -2,40 +2,65 @@
 #define DSLABEL_H
 
 #include <DSElement.h>
-#include <ILI9341_t3n.h>
 
-class DSLabel : public DSElement, public Docker
+class DSLabel : public DSElement
 {
 public:
-    DSLabel(ILI9341_t3n *lcd, String(label),
-            Color elementColor = Color(ILI9341_BLACK, ILI9341_WHITE, ILI9341_BLACK), DSElement *parent = nullptr)
-        : DSElement(lcd, label, Rect(), parent), Docker(left, yCentre)
+    DSLabel(ILI9341_t3n *lcd, String name) : DSElement(lcd, name)
     {
-        setColors(elementColor);
-        box = _textBox;
-        _anchor = AnchorPosition(HorizontalPosition::left, VerticalPosition::middle);
+        setBounds(Rect(0, 0, textSize.width, textSize.height));
+        color.border = ILI9341_WHITE;
+        setDidChange();
     }
 
-    ~DSLabel()
+    void render() override
     {
-    }
-
-    void render()
-    {
-        if (getShouldRedraw())
+        if (didChange)
         {
-            dock(this, _parent);
-            drawLabel(box.getCentre());
-            //logToScreen("x " + String(box.x) + ", w " + String(box.width));
+            DSElement::render();
+            drawText();
+            //drawBorder();
         }
-        DSElement::render();
+    }
+    void setAnchorPosition(uint8_t datum)
+    {
+        this->datum = datum;
+        setDidChange();        
     }
 
-    void setLabel(String s)
+    void onDidChange() override
     {
-        label = s;
-        _textBox = getTextBox(label);
-        docked = false;        
+        DSElement::onDidChange();
+        lcd->setFont(font);
+        setTextDimensions(name);
+        Rect b = getBounds();
+        setBounds(b.x, b.y, textSize.width, textSize.height);
+        Serial.printf("SuperClass [%s]: onDidChange() called!\n", name.c_str());
+    }
+
+protected:
+    uint8_t datum = TL_DATUM;
+
+    void drawText()
+    {        
+        Rect r = this->dockedBounds();
+        Serial.printf("BOUNDS %s, x=%d, y=%d, w=%d, h=%d\n", this->name.c_str(), r.x, r.y, r.width, r.height);
+        lcd->setFont(font);
+        lcd->setCursor(r.x, r.y);        
+        lcd->setTextDatum(datum);
+        lcd->setTextColor(color.text);
+        lcd->print(name.c_str());
+    }
+
+    Dimensions setTextDimensions(String s)
+    {
+        int16_t x1 = 0, y1 = 0;
+        uint16_t w = 0, h = 0;
+        lcd->setFont(font);
+        lcd->getTextBounds(s, 0, 0, &x1, &y1, &w, &h);        
+        textSize = Dimensions(w, h);
+        // Serial.printf("getTextDimensions : '%s', w=%d, h=%d\n", s.c_str(), w, h);
+        return textSize;
     }
 };
 

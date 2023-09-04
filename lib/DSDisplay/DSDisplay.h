@@ -4,12 +4,12 @@
 #include <ILI9341_t3n.h>
 #include <XPT2046_Touchscreen.h>
 #include <MsTimer2.h>
+#include <vector>
 #include <DSScene.h>
-#include <DSSceneVoice.h>
-#include <DSSceneSplash.h>
-#include <DSSceneEnvelope.h>
+#include <DSScenes.h>
 #include "DSFonts.h"
 #include "controls.h"
+
 
 #define TOUCH_CS 8
 #define TFT_CS 10
@@ -24,28 +24,14 @@
 #define TS_MAXX 3800
 #define TS_MAXY 3800
 
-class DSDisplay
+class DSDisplay : public DSBounds
 {
 public:
-    DSDisplay(void (*displayTouchCallback)(), PolySynth *synth, Controls *controls)
-    {
+    DSDisplay(void (*displayTouchCallback)(), PolySynth *synth, Controls *controls) : DSBounds()
+    {        
         _controls = controls;
-        sceneIndex = 0;
-        tft.setTextSize(1);
         this->onDisplayUpdateTouch = displayTouchCallback;
-
-        PSDCO *dco1 = synth->voice1.dco1;
-        PSDCO *dco2 = synth->voice1.dco2;
-        addScene(new DSSceneVoice(&tft));
-        addScene(new DSSceneEnvelope(&tft, F("OSC1 - A-ENV"), dco1->vca_env, controls));
-        addScene(new DSSceneEnvelope(&tft, F("OSC1 - F-ENV"), dco1->vcf_env, controls));
-        addScene(new DSSceneEnvelope(&tft, F("OSC1 - P-ENV"), dco1->mod_env, controls));
-        addScene(new DSSceneEnvelope(&tft, F("OSC2 - A-ENV"), dco2->vca_env, controls));
-        addScene(new DSSceneEnvelope(&tft, F("OSC2 - F-ENV"), dco2->vcf_env, controls));
-        addScene(new DSSceneEnvelope(&tft, F("OSC2 - P-ENV"), dco2->mod_env, controls));
-
-        scenes[sceneIndex]->show();
-        tft.setFont(FONT_UI_LABEL);
+        this->synth = synth;                
     }
     ~DSDisplay() {}
 
@@ -56,18 +42,40 @@ public:
         {
             Serial.println(F("Unable to start touchscreen."));
             while (1)
-                ;
+                delay(1);
         }
-        Serial.println(F("Touchscreen started."));
-
-        this->clearScreen(ILI9341_BLACK);
+        Serial.println(F("Touchscreen started."));        
         tft.setRotation(3);
-
-        MsTimer2::set(1000 / TOUCH_REFRESH_RATE, this->onDisplayUpdateTouch);
-        MsTimer2::start();
+        tft.fillScreen(ILI9341_BLACK);        
+        this->setBounds(2,0,318,240);
     }
 
-    void update()
+    void setupScenes()
+    {
+        PSDCO *dco1 = synth->voice1.dco1;
+        PSDCO *dco2 = synth->voice1.dco2;
+        
+        tft.setFont(FONT_UI_LABEL);
+        addScene(new DSTestScene(&tft));
+        addScene(new DSSceneVoice(&tft));
+        addScene(new DSParamEdit(&tft, dco1));
+        addScene(new DSSceneEnvelope(&tft, F("OSC1 - A-ENV"), dco1->vca_env, _controls));
+        addScene(new DSSceneEnvelope(&tft, F("OSC1 - F-ENV"), dco1->vcf_env, _controls));
+        addScene(new DSSceneEnvelope(&tft, F("OSC1 - P-ENV"), dco1->mod_env, _controls));
+        addScene(new DSSceneEnvelope(&tft, F("OSC2 - A-ENV"), dco2->vca_env, _controls));
+        addScene(new DSSceneEnvelope(&tft, F("OSC2 - F-ENV"), dco2->vcf_env, _controls));
+        addScene(new DSSceneEnvelope(&tft, F("OSC2 - P-ENV"), dco2->mod_env, _controls));
+
+        scenes[sceneIndex]->show();
+
+        Encoder *sceneEnc = &_controls->encoders[0];
+        sceneEnc->setRange(0, (int)scenes.size() - 1);
+        sceneIndex = 0;
+        tft.setTextSize(1);
+        tft.setFont(FONT_UI_HEADING);
+    }
+
+    void updateTouch()
     {
         /*
         if (ts->tirqTouched())
@@ -85,38 +93,26 @@ public:
 
     void render()
     {
-        if (_controls->buttons[0].pressed())
-        {
-            uint32_t now = millis();
-            if (now - lastSceneChange > 500)
-            {
-                nextScene();
-                lastSceneChange = now;
-            }
-        };
+        Encoder *sceneEnc = &_controls->encoders[0];
+        int newIndex = (int)max((int)sceneEnc->getValue(), 0) % scenes.size();
 
-        if (sceneIndex != 0)
-        {
-            ((DSSceneEnvelope *)scenes[sceneIndex])->updateControls();
-        }
-
+        if (newIndex != sceneIndex)
+            nextScene(newIndex);
         scenes[sceneIndex]->render();
     }
 
-    void clearScreen(uint16_t color = ILI9341_BLUE)
-    {
-        scenes[sceneIndex]->clear();
-    }
+    void clearScreen(uint16_t color = ILI9341_BLUE) { scenes[sceneIndex]->clear(); }
 
-    ILI9341_t3n &lcd()
-    {
-        return tft;
-    }
+    ILI9341_t3n &lcd() { return tft; }
 
-    void nextScene()
+    void nextScene(int newIndex = -1)
     {
         scenes[sceneIndex]->hide();
-        sceneIndex = (sceneIndex + 1) % scenes.size();
+
+        if (newIndex < 0)
+            sceneIndex = (sceneIndex + 1) % scenes.size();
+        else
+            sceneIndex = newIndex;
         scenes[sceneIndex]->show();
         scenes[sceneIndex]->clear();
         // render();
@@ -132,9 +128,10 @@ public:
         return scenes[sceneIndex];
     }
 
-private:
+private:    
     ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC);
     XPT2046_Touchscreen ts = XPT2046_Touchscreen(TOUCH_CS, TIRQ_PIN);
+    PolySynth *synth;
     void (*onDisplayUpdateTouch)();
     Controls *_controls = nullptr;
 
@@ -144,7 +141,7 @@ private:
 
     template <typename T>
     T *addScene(T *scene)
-    {
+    {        
         scenes.push_back(scene);
         return scene;
     }
