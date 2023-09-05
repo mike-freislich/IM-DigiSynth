@@ -27,6 +27,14 @@ public:
         stripe->dock(centre, noneV);
         stripe->show();       
         addElement(stripe); 
+
+        DSLabel *voiceName = new DSLabel(lcd, "SOOTHSAYER");
+        voiceName->setFont(FONT_UI_VOICENAME);
+        voiceName->color.text = CL(80,150,255);
+        voiceName->dock(centre, noneV);
+        voiceName->setBoundsPosition(0, 50);
+        voiceName->setAnchorPosition(CC_DATUM);
+        addElement(voiceName);
     }    
 
 private:

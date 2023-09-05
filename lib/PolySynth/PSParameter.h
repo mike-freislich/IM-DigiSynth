@@ -37,7 +37,6 @@ public:
         {
             _controller->update();
             float cvalScaled = map(_controller->getValue(), _controller->getAnalogMin(), _controller->getAnalogMax(), _rangeMin, _rangeMax);
-
             _didChange = setValue(cvalScaled);
             return _didChange;
         }
@@ -68,6 +67,7 @@ public:
             if (inputPos == lastInputPos)
                 return false;
         }
+
         if (force || isTracking)
         {
             lastInputPos = inputPos;
@@ -110,7 +110,6 @@ public:
         _active = true;
     }
     void deactivate() { _active = false; }
-
     void markChanged() { _didChange = true; }
 
 private:

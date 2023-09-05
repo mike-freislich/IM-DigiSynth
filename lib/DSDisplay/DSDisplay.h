@@ -58,7 +58,7 @@ public:
         tft.setFont(FONT_UI_LABEL);
         addScene(new DSTestScene(&tft));
         addScene(new DSSceneVoice(&tft));
-        addScene(new DSParamEdit(&tft, dco1));
+        addScene(new DSParamEdit(&tft, dco1->vca_env));
         addScene(new DSSceneEnvelope(&tft, F("OSC1 - A-ENV"), dco1->vca_env, _controls));
         addScene(new DSSceneEnvelope(&tft, F("OSC1 - F-ENV"), dco1->vcf_env, _controls));
         addScene(new DSSceneEnvelope(&tft, F("OSC1 - P-ENV"), dco1->mod_env, _controls));

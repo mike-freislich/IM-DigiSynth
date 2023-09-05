@@ -17,7 +17,7 @@
 #include "MIDIUSB.h"
 #include "tests.h"
 
-#define ARDUINO_SERIAL_DELAY 10000
+#define ARDUINO_SERIAL_DELAY 5000
 #define SCENE_DELAY 5000
 
 //void nextScene();

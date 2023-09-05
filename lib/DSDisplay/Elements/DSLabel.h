@@ -51,7 +51,7 @@ protected:
     {
         Rect r = this->dockedBounds();
         // Serial.printf("BOUNDS %s, x=%d, y=%d, w=%d, h=%d\n", this->name.c_str(), r.x, r.y, r.width, r.height);
-
+        
         lcd->setFont(font);
         lcd->setTextDatum(datum);
 

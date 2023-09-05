@@ -14,6 +14,7 @@ public:
     {
         setSceneName(F("PARAM Editor"));
         _component = component;
+
         addParameterBoxes();
     }
 
@@ -22,10 +23,15 @@ protected:
 
     void addParameterBoxes()
     {
-        PSParameter *fakeParm = new PSParameter("fakeParm", 50, 0, 100);
+        PSParameter *fakeParm = new PSParameter("-", 0, 0, 0);
+
         for (int i = 0; i < 8; i++)
         {
-            DSParameterBox *pbox = new DSParameterBox(_lcd, fakeParm, this);
+            PSParameter *p = this->getParameter(i);
+            if (p == nullptr)
+                p = fakeParm;
+
+            DSParameterBox *pbox = new DSParameterBox(_lcd, p, this);
             if (i < 5)
                 pbox->dock(left, noneV, 2);
             else
@@ -34,6 +40,14 @@ protected:
             pbox->setBoundsPosition(0, (i < 5) ? (30) + i * (pbox->boundsRect.height + 4) : (30) + (i - 3) * (pbox->boundsRect.height + 4));
             addElement(pbox);
         }
+    }
+
+    PSParameter *getParameter(int i)
+    {
+        if (i < _component->params.size())        
+            return _component->params[i];
+                
+        return nullptr;
     }
 };
 

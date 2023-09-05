@@ -15,17 +15,20 @@ public:
         setBounds(Rect(0,0,dimensions.width, dimensions.height));
         if (parentSpace != nullptr)
             attachToSpace(parentSpace);
-    }
+    }    
 
     void render() override
     {
         if (visible && didChange)
         {
             this->drawBackground();
+            if (borderEnabled)
+                this->drawBorder();
         }
         DSElement::render();
     }
 
+    bool borderEnabled = false;
 };
 
 #endif

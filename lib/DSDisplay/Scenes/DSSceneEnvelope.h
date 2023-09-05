@@ -44,11 +44,11 @@ public:
     {
         PSParameter *p = _envelope->params[paramType];
         if (potNum != -1)
-            p->attachController((InputBase *)&_controls->pots[potNum]);
+            p->attachController(&_controls->pots[potNum]);
         
         DSParameterDial *dial = new DSParameterDial(_lcd, p, _thisElement);
         dial->attachToSpace(this);
-        
+
         addElement(dial);
     }
 
