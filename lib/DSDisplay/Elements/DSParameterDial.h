@@ -77,14 +77,8 @@ private:
         if (iv != v)
             drawInputPositionMarker(iv, p);
 
-        String newString = String((int)parameter->getValue()) + parameter->units;
-                            
+        String newString = String((int)parameter->getValue()) + parameter->units;                            
         labelValue->setName(newString);
-
-        // TODO add the text back to DSParameterDial
-        // if (lastValue.length() > 0)
-        //    drawText(p.x, p.y + box.height / 2 - 4, lastValue, FONT_UI_PARAMETER, ILI9341_BLACK);
-        // drawText(p.x, p.y + box.height / 2 - 4, newString, FONT_UI_PARAMETER, textHighlightColor);
         lastValue = newString;
     }
 

@@ -94,7 +94,7 @@ protected:
             if (e->getName() == "PARM")
             {
                 int xpos = xmargin + i * horizontalSpacing;
-                Serial.printf("Setting Bounds for dial '%d' to x=%d, y=0\n", i, xpos);
+                //Serial.printf("Setting Bounds for dial '%d' to x=%d, y=0\n", i, xpos);
                 e->setBoundsPosition(xpos, 0);
                 e->dock(noneH, bottom, 0, 10);
                 i++;

@@ -34,7 +34,7 @@ public:
         setTextDimensions(name);
         Rect b = getBounds();
         setBounds(b.x, b.y, textSize.width, textSize.height);
-        Serial.printf("SuperClass [%s]: onDidChange() called!\n", name.c_str());
+        //Serial.printf("SuperClass [%s]: onDidChange() called!\n", name.c_str());
     }
 
     void didSetParent(DSElement *parent) override

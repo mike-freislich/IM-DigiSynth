@@ -18,11 +18,11 @@
 #define TOUCH_REFRESH_RATE 60
 #define SCREEN_REFRESH_RATE 60
 
-// This is calibration data for the raw touch data to the screen coordinates
-#define TS_MINX 350
-#define TS_MINY 350
-#define TS_MAXX 3800
-#define TS_MAXY 3800
+// // This is calibration data for the raw touch data to the screen coordinates
+// #define TS_MINX 350
+// #define TS_MINY 350
+// #define TS_MAXX 3800
+// #define TS_MAXY 3800
 
 class DSDisplay : public DSBounds
 {
@@ -115,18 +115,11 @@ public:
             sceneIndex = newIndex;
         scenes[sceneIndex]->show();
         scenes[sceneIndex]->clear();
-        // render();
     }
 
-    uint8_t getSceneID()
-    {
-        return sceneIndex;
-    }
+    uint8_t getSceneID() { return sceneIndex; }
 
-    DSScene *getCurrentScene()
-    {
-        return scenes[sceneIndex];
-    }
+    DSScene *getCurrentScene() { return scenes[sceneIndex]; }
 
 private:    
     ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC);

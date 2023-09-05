@@ -29,8 +29,6 @@ public:
         cp->show();
         p->addChild(cp);
         
-        
-
         text = new DSLabel(lcd, F("The labeL"));
         text->color.text = ILI9341_BLUE;
         text->color.border = ILI9341_DARKGREEN;
