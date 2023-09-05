@@ -19,7 +19,7 @@ public:
     DSBounds *screenBounds;
 
     DSElement(ILI9341_t3n *lcd, String name, DSBounds *parent = nullptr) : DSBounds()
-    {        
+    {
         screenBounds = new DSBounds(Rect(2, 0, lcd->width() - 2, lcd->height()), nullptr);
         setBounds(0, 0, 5, 5, screenBounds);
         this->lcd = lcd;
@@ -28,12 +28,14 @@ public:
         this->visible = false;
     }
 
+    virtual void didSetParent(DSElement *parent) {}
     void setParent(DSElement *parent)
     {
         if (parent != nullptr)
         {
             this->parent = parent;
             this->attachToSpace((DSBounds *)parent);
+            didSetParent(parent);
         }
     }
 
@@ -57,7 +59,7 @@ public:
     }
 
     DSElement *addChild(DSElement *element)
-    {        
+    {
         element->setParent(this);
         children.push_back(element);
         return element;

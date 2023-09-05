@@ -13,15 +13,15 @@
 #include "PSParameter.h"
 #include "DSParameterDial.h"
 
-class DSSceneEnvelope: public DSScene
+class DSSceneEnvelope : public DSScene
 {
 public:
-    DSSceneEnvelope(ILI9341_t3n *lcd, String label, PSEnvelope *env, Controls *controls): DSScene(lcd)
+    DSSceneEnvelope(ILI9341_t3n *lcd, String label, PSEnvelope *env, Controls *controls) : DSScene(lcd)
     {
         _thisElement = (DSElement *)this;
         _envelope = env;
         _controls = controls;
-        color.background = 0;        
+        color.background = 0;
         setSceneName(label);
 
         addDial(PSP_ENV_ATTACK, 0);
@@ -45,7 +45,11 @@ public:
         PSParameter *p = _envelope->params[paramType];
         if (potNum != -1)
             p->attachController((InputBase *)&_controls->pots[potNum]);
-        addElement(new DSParameterDial(_lcd, p, _thisElement));
+        
+        DSParameterDial *dial = new DSParameterDial(_lcd, p, _thisElement);
+        dial->attachToSpace(this);
+        
+        addElement(dial);
     }
 
     void render() override
@@ -55,25 +59,25 @@ public:
     }
 
     void updateControls()
-    {        
+    {
         if (visible)
         {
-            if (_envelope->update())                           
-                graph->setDidChange();            
+            if (_envelope->update())
+                graph->setDidChange();
         }
     }
 
     void show() override
     {
         DSScene::show();
-        for (auto p : _envelope->params) 
+        for (auto p : _envelope->params)
             p->activate();
     }
     void hide() override
     {
         DSScene::hide();
         for (auto p : _envelope->params)
-            p->deactivate();        
+            p->deactivate();
     }
 
 protected:
@@ -82,7 +86,6 @@ protected:
         int parmCount = _envelope->params.size();
         const int usableWidth = 280;
         const int xmargin = (320 - usableWidth) / 2;
-        int ymargin = 3;
         int horizontalSpacing = usableWidth / (parmCount - 2);
 
         int i = 0;
@@ -90,8 +93,9 @@ protected:
         {
             if (e->getName() == "PARM")
             {
-                Rect bb = e->dockedBounds();
-                e->setBoundsPosition(xmargin + i * horizontalSpacing, 0);//this->height() - bb.height - ymargin);
+                int xpos = xmargin + i * horizontalSpacing;
+                Serial.printf("Setting Bounds for dial '%d' to x=%d, y=0\n", i, xpos);
+                e->setBoundsPosition(xpos, 0);
                 e->dock(noneH, bottom, 0, 10);
                 i++;
             }

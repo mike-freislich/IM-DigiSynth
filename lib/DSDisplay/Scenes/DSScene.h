@@ -25,6 +25,7 @@ public:
         setBounds(offsetx, 0, lcd->width() - offsetx, lcd->height());
 
         DSElement *panel = new DSPanel(_lcd, "TOPBAR", Dimensions(this->getBounds().width, 25), this);
+        panel->color.background = ILI9341_BLUE;
         addElement(panel);
 
         _sceneName = new DSLabel(_lcd, ".");
