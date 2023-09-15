@@ -9,8 +9,9 @@
 #include <patching.h>
 #include "PSPatchManager.h"
 #include "DSLFO.h"
+#include "PSLFO.h"
 #include "waveshaperTables.h"
-#include "PSDCO.h"
+#include "PSVoicePart.h"
 #include "PSEnvelope.h"
 #include "PSVoice.h"
 #include "waves.h"
@@ -67,29 +68,32 @@ struct StereoLevels
 class PolySynth
 {
 public:
-    DSLFO *filterLFO;
-    DSLFO *filterLFO2;
+    PSLFO *filterLFO;
+    PSLFO *filterLFO2;
     DSLFO *pitchLFO;
     DSLFO *pitchLFO2;
 
     PSVoice voice1 = PSVoice("Voice1");
 
-    PolySynth()
-    {
-    }
+    PolySynth() { }
     ~PolySynth() {}
 
     void init()
     {
         AudioMemory(32);
-
         // filterLFO = new DSLFO(WAVEFORM_TRIANGLE, 0.05, 1.0);
         // filterLFO->addConnectionOut(&filter1modMixer, 1);
         // filterLFO->addConnectionOut(&filter2modMixer, 1);
-        filterLFO2 = new DSLFO(WAVEFORM_TRIANGLE, 0.05, 1.0);
+        filterLFO2 = new PSLFO(F("Filter-LFO1"));// WAVEFORM_TRIANGLE, 0.05, 1.0);
+        filterLFO2->setWaveForm(WAVEFORM_TRIANGLE);
+        filterLFO2->setAmplitude(0.2f);
+        filterLFO2->setFrequency(36.0f);
+        filterLFO2->attachSend(&filter1modMixer, 2);
+        filterLFO2->attachSend(&filter2modMixer, 2);
+        //filterLFO2->
         // filterLFO2 = new DSLFO(WAVEFORM_TRIANGLE, 36, 0.2);
-        filterLFO2->addConnectionOut(&filter1modMixer, 2);
-        filterLFO2->addConnectionOut(&filter2modMixer, 2);
+        //filterLFO2->addConnectionOut(&filter1modMixer, 2);
+        //filterLFO2->addConnectionOut(&filter2modMixer, 2);
 
         filter1blockMixer.gain(0, 0);
         filter1blockMixer.gain(1, 0);
@@ -158,7 +162,7 @@ public:
         initOscMixer();
         setNoise(NoiseType::pinkNoise);
 
-        ringMod(0.0, 500, WAVEFORM_SAMPLE_HOLD);
+        ringMod(1.0, 500, WAVEFORM_TRIANGLE);
         xmod(0, 0.5);
         xmod(1, 0.5);
 
@@ -176,19 +180,19 @@ public:
         if (now - waveTimer > 10000)
         {
             waveTimer = now;
-            nextWaveForm();
+            //nextWaveForm();
         }
 
         AudioNoInterrupts();
-        waveformLeft.begin(AMPLITUDE * velocity2amplitude[velocity], noteFreqs[midiNote] - _detune, waves[waveIndex]);
+        waveformLeft.begin(AMPLITUDE * velocity2amplitude[velocity], noteFreqs[midiNote] - _detune, (uint16_t)voice1.part1->params[0]->getValue());
         waveformRight.begin(AMPLITUDE * velocity2amplitude[velocity], noteFreqs[midiNote] + _detune, waves[waveIndex]); // detune
 
-        voice1.dco1->vca_env->noteOn();
-        voice1.dco1->vcf_env->noteOn();
-        voice1.dco1->mod_env->noteOn();
-        voice1.dco2->vca_env->noteOn();
-        voice1.dco2->vcf_env->noteOn();
-        voice1.dco2->mod_env->noteOn();
+        voice1.part1->vca_env->noteOn();
+        voice1.part1->vcf_env->noteOn();
+        voice1.part1->mod_env->noteOn();
+        voice1.part2->vca_env->noteOn();
+        voice1.part2->vcf_env->noteOn();
+        voice1.part2->mod_env->noteOn();
         AudioInterrupts();
     }
 

@@ -65,6 +65,7 @@ public:
 
     virtual void update() {}
     virtual float getValue() { return _value; }
+    virtual float getRawValue() { return _value; }
     virtual void setValue(float value) { _value = value; }
 
     uint8_t getPin() { return _pin; }
@@ -104,8 +105,8 @@ public:
         return false;
     }
 
-    float getValue() override { return (float)getLogValue(); }
-    long getLogValue() { return (_value * (_value + 1)) >> 10; } // 10bit resolution
+    float getValue() override { return getLogValue(); }    
+    float getLogValue() { return (float)((_value * (_value + 1)) >> 10); } // 10bit resolution
     void update() override { setValue(analogRead(_pin)); }
 
 protected:

@@ -169,7 +169,7 @@ public:
             {
                 SeqStep *step = &(_tracks[t].steps[s]);
 
-                step->midiNote = random(3)*3 + 36;
+                step->midiNote = random(3)*3 + 36 -5;
                 step->velocity = (random(64) + 64 - 1);
                 step->tie = false;
             }

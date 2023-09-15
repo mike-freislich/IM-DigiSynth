@@ -51,15 +51,12 @@ public:
     {
         for (auto param : params)
         {
-            // printf("searching for P-%s\n", parameterName.c_str());
             if (param->name == parameterName)
             {
                 param->setValue(v, force);
-                // Serial.println("found!");
                 return true;
             }
         }
-        // Serial.println("not found!");
         return false;
     }
 
@@ -70,6 +67,197 @@ public:
             return false;
         params[parameterIndex]->setValue(v, force);
         return true;
+    }
+
+    // returns a string containing the config data
+    String toString()
+    {
+        String s = "*" + name + "{";
+        for (auto param : params)
+            s += param->name + ":" + param->getValue() + ",";
+        if (s.charAt(s.length() - 1) == ',')
+            s.remove(s.length() - 1);
+        for (auto child : children)
+            s += child->toString();
+        s += "}";
+        return s;
+    }
+
+    // accepts a config data string and sets the parameters of the component
+    void fromString(String data, int startIndex = 0)
+    {
+#pragma region find first thisComponent in the data
+        // Serial.printf("----> INSIDE COMPONENT '%s' <---\n", name.c_str());
+        String componentName;
+        const char *cd = data.c_str();
+        int p = startIndex;
+        while (componentName != this->name)
+        {
+            componentName = "";
+            if (findNextIndexOf(cd, '*', p) != -1)
+                if (findNextIndexOf(cd, '{', p, &componentName) == -1)
+                    return; // bail if there's no block start after the component name
+        }
+        int endIndex = findBlockEnd(cd, p);
+        // Serial.println(data.substring(startIndex, endIndex));
+        // Serial.printf("Component Block start %d, end %d\n", p, endIndex);
+        if (endIndex < 0)
+        {
+            // Serial.println(F("Error loading data.. runaway component block"));
+            return;
+        }
+        // Serial.printf(">>>>>> %s <<<<<<\n", componentName.c_str());
+        p++;
+        while (isWhitespace(cd[p]) && p < endIndex)
+            p++;
+
+#pragma endregion
+
+#pragma region getParameters for thisComponent
+
+        // Get Parameter Block
+        int nextComponent = p;
+        int endParameterBlock = p;
+        findNextIndexOf(cd, '*', nextComponent);
+        findNextIndexOf(cd, '}', endParameterBlock);
+        if (endParameterBlock == endIndex)
+            return;
+        // Serial.printf("nextComponent %d, endParameterBlock %d\n", nextComponent, endParameterBlock);=
+        String pblock = data.substring(p, min(nextComponent, endParameterBlock));
+        // Serial.printf("allocated pblock with %d characters\n", pblock.length());
+        if (pblock.length())
+        {
+            p = min(nextComponent, endParameterBlock);
+            // Serial.printf("PARAMETER BLOCK : %s\n", pblock.c_str());
+
+            // get Parameters
+            SplitStrings paramStrings = splitString(pblock, ',');
+            for (auto pstring : paramStrings)
+            {
+                // Serial.printf("analyzing PARM: %s\n", pstring.c_str());
+                SplitStrings nameValuePair = splitString(pstring, ':');
+                if (nameValuePair.size() == 2)
+                {
+                    set(nameValuePair[0], nameValuePair[1].toFloat(), true);
+                    // Serial.printf("setting %s->%s to %.2f\n", this->name.c_str(), nameValuePair[0].c_str(), nameValuePair[1].toFloat());
+                }
+            }
+        }
+#pragma endregion
+
+        // TODO this is finding all child components each time. Perhaps split data string that is handed to children?
+        // find all component blocks and pass them to each valid component
+        if (children.size() > 0)
+        {
+            // Serial.println("Finding child components");
+            while (cd[p] != '\0' && p < endIndex)
+            {
+                if (findNextIndexOf(cd, '*', p) != -1)
+                {
+                    int compStartIndex = p;
+                    String childComponentName = "";
+                    if (findNextIndexOf(cd, '{', p, &childComponentName) != -1 && p < endIndex)
+                    {
+                        // Serial.printf("searching for child '%s'\n", childComponentName.c_str());
+                        for (uint8_t c = 0; c < children.size(); c++)
+                        {
+                            PSComponent *child = children[c];
+                            if (child->name == childComponentName)
+                            {
+                                child->fromString(data, compStartIndex);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        this->updateFromControl();
+    }
+
+    PSParameter *addParameter(String name, float value, float rangeMin, float rangeMax, AudioStream *a, ParameterTarget t)
+    {
+        PSParameter *newp = new PSParameter(name, value, rangeMin, rangeMax, a, t);
+        params.push_back(newp);
+        return newp;
+    }
+
+    PSParameter *addParameter(String name, float value, float rangeMin, float rangeMax)
+    {
+        return addParameter(name, value, rangeMin, rangeMax, nullptr, nullptr);
+    }
+
+    FLASHMEM PSComponent *addChild(PSComponent *child)
+    {
+        children.push_back(child);
+        child->parent = this;
+        return child;
+    }
+
+    FLASHMEM PSComponent *childComponent(String name)
+    {
+        for (auto child : children)
+        {
+            if (child->name == name)
+                return child;
+        }
+        return nullptr;
+    }
+
+    virtual void attachControllers(Controls *c) {}
+    virtual void detachControllers() {}
+    virtual bool updateFromControl()
+    {
+        
+        for (auto parameter : params)
+        {
+            if (parameter != nullptr)
+            {
+                if (parameter->didChange())
+                    parameter->callTarget();
+            }
+        }
+        // return PSComponent::updateFromControl();
+        if (controllersDidChange())
+        {
+            updateAudioStreamComponent();
+            return true;
+        }
+        return false;
+    }
+    virtual void updateAudioStreamComponent() {}
+
+protected:
+    AudioConnectionVector _connections;
+
+    FLASHMEM bool controllersDidChange()
+    {
+        for (auto p : params)
+            if (p->didChange(true))
+                return true;
+        return false;
+    }
+
+    // searches a string e.g. = "{xxxx {} xxx { {}}  }"
+    // to find the index of closing brace for the opening brace at the start
+    FLASHMEM int findBlockEnd(const char *data, int startIndex)
+    {
+        int i = startIndex;
+        if (findNextIndexOf(data, '{', i) < 0)
+            return -1;
+        int openCount = 1;
+        char c = data[++i];
+        while (c != '\0')
+        {
+            if (c == '{')
+                openCount++;
+            else if (c == '}')
+                openCount--;
+            if (openCount == 0)
+                return ++i;
+            c = data[++i];
+        }
+        return -1;
     }
 
     // string manipulation : ...
@@ -99,168 +287,6 @@ public:
         }
         return p;
     }
-
-    // returns a string containing the config data
-    String toString()
-    {
-        String s = "*" + name + "{";
-        for (auto param : params)
-            s += param->name + ":" + param->getValue() + ",";
-        if (s.charAt(s.length() - 1) == ',')
-            s.remove(s.length() - 1);
-        for (auto child : children)
-            s += child->toString();
-        s += "}";
-        return s;
-    }
-
-    // searches a string e.g. = "{xxxx {} xxx { {}}  }"
-    // to find the index of closing brace for the opening brace at the start
-    int findBlockEnd(const char *data, int startIndex)
-    {
-        int i = startIndex;
-        if (findNextIndexOf(data, '{', i) < 0)
-            return -1;
-        int openCount = 1;
-        char c = data[++i];
-        while (c != '\0')
-        {
-            if (c == '{')
-                openCount++;
-            else if (c == '}')
-                openCount--;
-            if (openCount == 0)
-                return ++i;
-            c = data[++i];
-        }
-        return -1;
-    }
-
-    // accepts a config data string and sets the parameters of the component
-    void fromString(String data, int startIndex = 0)
-    {
-#pragma region find first thisComponent in the data
-        // Serial.printf("----> INSIDE COMPONENT '%s' <---\n", name.c_str());
-
-        String componentName;
-        const char *cd = data.c_str();
-        int p = startIndex;
-        while (componentName != this->name)
-        {
-            componentName = "";
-            if (findNextIndexOf(cd, '*', p) != -1)
-                if (findNextIndexOf(cd, '{', p, &componentName) == -1)
-                    return; // bail if there's no block start after the component name
-        }
-        int endIndex = findBlockEnd(cd, p);
-        // Serial.println(data.substring(startIndex, endIndex));
-        // Serial.printf("Component Block start %d, end %d\n", p, endIndex);
-        if (endIndex < 0)
-        {
-            //Serial.println(F("Error loading data.. runaway component block"));
-            return;
-        }
-        //Serial.printf(">>>>>> %s <<<<<<\n", componentName.c_str());
-        p++;
-        while (isWhitespace(cd[p]) && p < endIndex)
-            p++;
-
-#pragma endregion
-
-#pragma region getParameters for thisComponent;
-
-        // Get Parameter Block
-        int nextComponent = p;
-        int endParameterBlock = p;
-        findNextIndexOf(cd, '*', nextComponent);
-        findNextIndexOf(cd, '}', endParameterBlock);
-        if (endParameterBlock == endIndex)
-            return;
-        // Serial.printf("nextComponent %d, endParameterBlock %d\n", nextComponent, endParameterBlock);=
-        String pblock = data.substring(p, min(nextComponent, endParameterBlock));
-        //Serial.printf("allocated pblock with %d characters\n", pblock.length());
-        if (pblock.length())
-        {
-            p = min(nextComponent, endParameterBlock);
-            // Serial.printf("PARAMETER BLOCK : %s\n", pblock.c_str());
-
-            // get Parameters
-            SplitStrings paramStrings = splitString(pblock, ',');
-            for (auto pstring : paramStrings)
-            {
-                // Serial.printf("analyzing PARM: %s\n", pstring.c_str());
-                SplitStrings nameValuePair = splitString(pstring, ':');
-                if (nameValuePair.size() == 2)
-                {
-                    set(nameValuePair[0], nameValuePair[1].toFloat(), true);
-                    //Serial.printf("setting %s->%s to %.2f\n", this->name.c_str(), nameValuePair[0].c_str(), nameValuePair[1].toFloat());
-                }
-            }
-        }
-#pragma endregion
-
-        // TODO this is finding all child components each time. Perhaps split data string that is handed to children?
-        // find all component blocks and pass them to each valid component
-        if (children.size() > 0)
-        {
-            //Serial.println("Finding child components");
-            while (cd[p] != '\0' && p < endIndex)
-            {
-                if (findNextIndexOf(cd, '*', p) != -1)
-                {
-                    int compStartIndex = p;
-                    String childComponentName = "";
-                    if (findNextIndexOf(cd, '{', p, &childComponentName) != -1 && p < endIndex)
-                    {
-                        //Serial.printf("searching for child '%s'\n", childComponentName.c_str());
-                        for (uint8_t c = 0; c < children.size(); c++)
-                        {
-                            PSComponent *child = children[c];
-                            if (child->name == childComponentName)
-                            {
-                                child->fromString(data, compStartIndex);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        this->update();
-    }
-
-    FLASHMEM PSParameter *addParameter(String name, float value, float rangeMin, float rangeMax)
-    {
-        PSParameter *newp = new PSParameter(name, value, rangeMin, rangeMax);
-        params.push_back(newp);
-        return newp;
-    }
-
-    FLASHMEM PSComponent *addChild(PSComponent *child)
-    {
-        children.push_back(child);
-        child->parent = this;
-        return child;
-    }
-
-    FLASHMEM PSComponent *childComponent(String name)
-    {
-        for (auto child : children)
-        {
-            if (child->name == name)
-                return child;
-        }
-        return nullptr;
-    }
-
-    virtual void attachControllers(Controls *c) {}
-    virtual void detachControllers() {}
-    virtual bool update() { return false; }
-    virtual void updateAudioStreamComponent() {}
-
-protected:
-    AudioConnectionVector _connections;
 };
 
 typedef std::vector<PSComponent *> PSComponentVector;

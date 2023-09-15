@@ -37,7 +37,6 @@ public:
     ~DSSceneEnvelope()
     {
         DSScene::~DSScene();
-        // delete[] _parms;
     }
 
     void addDial(PSEnvelopeParam paramType, int potNum)
@@ -45,7 +44,7 @@ public:
         PSParameter *p = _envelope->params[paramType];
         if (potNum != -1)
             p->attachController(&_controls->pots[potNum]);
-        
+
         DSParameterDial *dial = new DSParameterDial(_lcd, p, _thisElement);
         dial->attachToSpace(this);
 
@@ -62,7 +61,7 @@ public:
     {
         if (visible)
         {
-            if (_envelope->update())
+            if (_envelope->updateFromControl())
                 graph->setDidChange();
         }
     }
@@ -83,18 +82,20 @@ public:
 protected:
     void layoutParams()
     {
-        int parmCount = _envelope->params.size();
+        //int parmCount = _envelope->params.size();
         const int usableWidth = 280;
         const int xmargin = (320 - usableWidth) / 2;
-        int horizontalSpacing = usableWidth / (parmCount - 2);
+        int n = 5;                 // Number of objects
+        const int w = 50;          // Width of each object
+        const int x = usableWidth; // Horizontal distance
+        int spacing = (x - w) / (n - 1);
 
         int i = 0;
         for (auto e : elements)
         {
             if (e->getName() == "PARM")
-            {
-                int xpos = xmargin + i * horizontalSpacing;
-                //Serial.printf("Setting Bounds for dial '%d' to x=%d, y=0\n", i, xpos);
+            {                
+                int xpos = xmargin + i * spacing;                
                 e->setBoundsPosition(xpos, 0);
                 e->dock(noneH, bottom, 0, 10);
                 i++;

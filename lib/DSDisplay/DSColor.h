@@ -4,6 +4,7 @@
 #define COLOR_BORDER CL(50, 50, 200)
 #define COLOR_HEADING_FILL CL(50, 50, 200)
 #define COLOR_BACKGROUND 0
+#define COLOR_BACKGROUND_HIGHLIGHT CL(20,20,20)
 #define COLOR_TOP_PANEL CL(80, 150, 255)
 #define COLOR_TEXT CL(255,255,255)
 #define COLOR_TEXT_HIGHLIGHT CL(255, 255, 64)
@@ -18,7 +19,9 @@ struct ElementColor
 {
     uint16_t
         background = COLOR_BACKGROUND,
+        backgroundHighlight = COLOR_BACKGROUND_HIGHLIGHT,
         border = COLOR_BORDER,
+        borderHighlight = COLOR_BORDER,
         text = COLOR_TEXT,
         textHighLight = COLOR_TEXT_HIGHLIGHT,
         control = COLOR_CONTROL,

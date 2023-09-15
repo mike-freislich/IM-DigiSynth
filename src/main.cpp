@@ -20,7 +20,6 @@
 #define ARDUINO_SERIAL_DELAY 5000
 #define SCENE_DELAY 5000
 
-//void nextScene();
 void refreshDisplay();
 void onDisplayUpdateTouch();
 void onSerialLogTimer();
@@ -61,14 +60,14 @@ FLASHMEM void setup()
   Serial.begin(115200);
 #endif
   display.begin();
+  polySynth.init();
   display.setupScenes();
 #ifdef USB_MIDI_AUDIO_SERIAL
   delayForSerial();
 #endif
 #ifdef RUNTESTS
   runTests();
-#endif
-  polySynth.init();
+#endif  
   polySynth.loadPatch(0);
   //Serial.println(polySynth.voice1.toString());
   seq.setTempo(SEQ_TEMPO, 8);
@@ -76,11 +75,6 @@ FLASHMEM void setup()
   display.nextScene();
   threads.addThread(synthLoop);
 }
-
-// FLASHMEM void nextScene()
-// {
-//   display.nextScene();
-// }
 
 void refreshDisplay() { display.render(); }
 
@@ -98,7 +92,7 @@ FLASHMEM void loop()
 
   if (controls.buttons[0].didLongPress())
     polySynth.savePatch(0);
-
+    
   serialLogTimer.update();  
 
   delay(1);

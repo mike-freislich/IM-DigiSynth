@@ -1,7 +1,7 @@
 #ifndef PS_TESTS_H
 #define PS_TESTS_H
 
-//#define RUNTESTS
+#define RUNTESTS
 
 #ifdef RUNTESTS
 
@@ -11,11 +11,73 @@
 
 void testComponents();
 void testSDCard();
+bool testAudioStream();
+bool testAudioComponent();
 
 FLASHMEM void runTests()
 {
-    testComponents();
-    //testSDCard();
+    Serial.println("*************** RUNNING TESTS *************** ");
+    // testComponents();
+    // testSDCard();
+
+    // testAudioStream();
+
+    testAudioComponent();
+}
+
+class ACEnvelope : public PSComponent
+{
+public:
+    ACEnvelope(String name = "ACEnvelope") : PSComponent(name) {}
+};
+
+FLASHMEM bool testAudioComponent()
+{    
+    ACEnvelope ace;
+    PSParameter *attack = ace.addParameter("Attack", 50, 0, 1000, &filter1env, [](AudioStream *audioStream, float value)
+                     { ((AudioEffectEnvelope *)audioStream)->attack(value); });
+
+    attack->setValue(112);
+    attack->callTarget();
+
+    delete attack;
+    return true;
+}
+
+class Foo // Parameter
+{
+public:
+    Foo(AudioStream *s, float v, ParameterTarget t)
+    {
+        setAudioStream(s);
+        setTarget(t);
+        setValue(v);
+    };
+
+    void setAudioStream(AudioStream *stream) { audioStream = stream; }
+    void setTarget(ParameterTarget t) { target = t; }
+    void setValue(float v) { value = v; }
+
+    void callTarget()
+    {
+        if (target != nullptr)
+            target(audioStream, value);
+    }
+
+private:
+    ParameterTarget target = nullptr;
+    AudioStream *audioStream = nullptr;
+    float value;
+};
+
+FLASHMEM bool testAudioStream()
+{
+    Foo foo(&filter1env, 99.1, [](AudioStream *audioStream, float value)
+            { ((AudioEffectEnvelope *)audioStream)->attack(value); });
+
+    foo.callTarget();
+
+    return true;
 }
 
 FLASHMEM bool savePatch(const char *filename, String data)

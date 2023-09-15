@@ -10,7 +10,6 @@
 #include "DSFonts.h"
 #include "controls.h"
 
-
 #define TOUCH_CS 8
 #define TFT_CS 10
 #define TFT_DC 9
@@ -52,13 +51,18 @@ public:
 
     void setupScenes()
     {
-        PSDCO *dco1 = synth->voice1.dco1;
-        PSDCO *dco2 = synth->voice1.dco2;
+        PSVoicePart *dco1 = synth->voice1.part1;
+        PSVoicePart *dco2 = synth->voice1.part2;
+        PSLFO *filterLFO1 = synth->filterLFO2;
+
+//      PSLFO *filterLFO = new PSLFO()
         
         tft.setFont(FONT_UI_LABEL);
         addScene(new DSTestScene(&tft));
         addScene(new DSSceneVoice(&tft));
-        addScene(new DSParamEdit(&tft, dco1->vca_env));
+        addScene(new DSParamEdit(&tft, &synth->voice1));
+        addScene(new DSParamEdit(&tft, dco1));
+        addScene(new DSParamEdit(&tft, filterLFO1));
         addScene(new DSSceneEnvelope(&tft, F("OSC1 - A-ENV"), dco1->vca_env, _controls));
         addScene(new DSSceneEnvelope(&tft, F("OSC1 - F-ENV"), dco1->vcf_env, _controls));
         addScene(new DSSceneEnvelope(&tft, F("OSC1 - P-ENV"), dco1->mod_env, _controls));

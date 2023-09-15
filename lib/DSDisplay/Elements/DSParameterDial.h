@@ -47,7 +47,7 @@ public:
 
     void render()
     {
-        if ((visible && didChange) || parameter->update())
+        if ((visible && didChange) || parameter->updateFromControl())
         {
             drawDial();
             DSElement::render();

@@ -18,7 +18,7 @@ public:
     ElementColor color = ElementColor();
     DSBounds *screenBounds;
 
-    DSElement(ILI9341_t3n *lcd, String name, DSBounds *parent = nullptr) : DSBounds()
+    DSElement(ILI9341_t3n *lcd, String name) : DSBounds()
     {
         screenBounds = new DSBounds(Rect(2, 0, lcd->width() - 2, lcd->height()), nullptr);
         setBounds(0, 0, 5, 5, screenBounds);
@@ -85,14 +85,35 @@ public:
         onDidChange();
     }
 
+    void select()
+    {
+        if (selected)
+            return;
+        selected = true;        
+        for (auto child: children)        
+            child->select();        
+        setDidChange();
+    }
+
+    void unselect()
+    {
+        if (!selected)
+            return;
+        selected = false;
+        for (auto child: children)        
+            child->unselect();
+        setDidChange();
+    }
+
 protected:
-    String name;
+    String name = "";
     ILI9341_t3_font_t font = FONT_UI_LABEL;
     ILI9341_t3n *lcd;
     DSElementVector children;
     Dimensions textSize = Dimensions();
     bool didChange = true;
     bool visible = false;
+    bool selected = false;
 
     virtual void onDidChange()
     {
@@ -100,16 +121,17 @@ protected:
         // Serial.printf("BaseClass [%s]: onDidChange() called!\n", name.c_str());
     }
 
-    void drawBorder()
+    void drawBorder() { drawBorder(selected ? color.borderHighlight : color.border); }
+    void drawBorder(uint16_t color)
     {
         Rect r = dockedBounds();
-        lcd->drawRect(r.x, r.y, r.width, r.height, color.border);
+        lcd->drawRect(r.x, r.y, r.width, r.height, color);
     }
 
     void drawBackground()
     {
         Rect r = dockedBounds();
-        lcd->fillRect(r.x, r.y, r.width, r.height, color.background);
+        lcd->fillRect(r.x, r.y, r.width, r.height, selected ? color.backgroundHighlight : color.background);
     }
 
 private:

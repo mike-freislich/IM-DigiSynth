@@ -100,6 +100,8 @@ public:
             e->hide();
     }
 
+    virtual void update() {}
+
     virtual bool isVisible() { return visible; }
 
 protected:

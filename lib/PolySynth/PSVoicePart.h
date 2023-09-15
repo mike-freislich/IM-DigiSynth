@@ -5,16 +5,16 @@
 #include "PSEnvelope.h"
 #include "waves.h"
 
-class PSDCO : public PSComponent
+class PSVoicePart : public PSComponent
 {
 public:
     PSEnvelope *vca_env, *vcf_env, *mod_env;
     
     
-    PSDCO(String name, AudioEffectEnvelope *a_env, AudioEffectEnvelope *f_env, AudioEffectEnvelope *p_env)
+    PSVoicePart(String name, AudioEffectEnvelope *a_env, AudioEffectEnvelope *f_env, AudioEffectEnvelope *p_env)
         :PSComponent(name)
     {
-        vca_env = new PSEnvelope("A-ENV", a_env);        
+        vca_env = new PSEnvelope("A-ENV", a_env);
         vcf_env = new PSEnvelope("F-ENV", f_env);
         mod_env = new PSEnvelope("P-ENV", p_env);
 
@@ -24,7 +24,7 @@ public:
 
         addParameter("waveform", 1, 0, 11);
     }
-    ~PSDCO() {}
+    ~PSVoicePart() {}
 
 private:
     

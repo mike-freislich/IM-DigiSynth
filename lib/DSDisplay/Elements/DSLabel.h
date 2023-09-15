@@ -59,7 +59,7 @@ protected:
             lcd->fillRect(lastBounds.x, lastBounds.y, lastBounds.width, lastBounds.height, color.background);                    
         
         lcd->setCursor(r.x, r.y);
-        lcd->setTextColor(color.text);
+        lcd->setTextColor(selected ? color.textHighLight : color.text);
         lcd->print(name.c_str());
         lastValue = name;  
         lastBounds = r;
