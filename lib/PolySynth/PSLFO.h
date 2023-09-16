@@ -42,44 +42,10 @@ public:
             wave->begin(_amplitude, _frequency, _waveForm);
     }
 
-    // void setWaveForm(uint8_t waveForm) { _waveForm = clamp(waveForm, (uint8_t)0, (uint8_t)(sizeof(waves) - 1)); }
-    // void setAmplitude(float amplitude) { _amplitude = clamp(amplitude, 0.0f, 1.0f); }
-    // void setFrequency(float frequency) { _frequency = clamp(frequency, 0.0f, (float)LFO_MAX_FREQ); }
-    // uint8_t getWaveForm() { return _waveForm; }
-
-    FLASHMEM void attachSend(AudioStream *dest, uint8_t channel) { _connections.push_back(new AudioConnection(*wave, 0, *dest, channel)); }
-    // FLASHMEM void attachInput(AudioStream *dest, uint8_t channel) { _connections.push_back(new AudioConnection(*wave, 0, *dest, channel)); }
-
-    // void updateAudioStreamComponent() override
-    // {
-    //     float a = params[PSP_LFO_AMP]->getValue();
-    //     float f = params[PSP_LFO_RATE]->getValue();
-    //     uint8_t w = params[PSP_LFO_SHAPE]->getValue();
-    //     Serial.printf("a %2.2f, f %2.2f, w %d\n", a, f, w);
-    //     if (a != _amplitude)
-    //     {
-    //         _amplitude = a;
-    //         wave->amplitude(a);
-    //     }
-    //     if (f != _frequency)
-    //     {
-    //         _frequency = f;
-    //         wave->frequency(f);
-    //     }
-    //     if (w != _waveForm)
-    //     {
-    //         _waveForm = w;
-    //         wave->begin(_waveForm);
-    //     }
-    //     // if (!wave->isActive())
-    //     // {
-    //     //     wave->begin(_amplitude, _frequency, _waveForm);
-    //     // }
-    // }
+    FLASHMEM void attachSend(AudioStream *dest, uint8_t channel) { _connections.push_back(new AudioConnection(*wave, 0, *dest, channel)); }    
 
 private:
-    AudioSynthWaveformModulated *wave;
-    // AudioSynthWaveformDc *_carrier;
+    AudioSynthWaveformModulated *wave;    
     uint8_t _waveForm;
     float _amplitude, _frequency;
     PSParameter *pWaveform, *pAmplitude, *pFrequency;
