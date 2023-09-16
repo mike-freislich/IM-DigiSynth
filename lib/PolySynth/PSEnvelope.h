@@ -22,17 +22,17 @@ public:
     PSEnvelope(String name, AudioEffectEnvelope *envelope) : PSComponent(name)
     {
         pDelay = addParameter("Del", 0, 0, 1000, envelope, [](AudioStream *audioStream, float value)
-                               { ((AudioEffectEnvelope *)audioStream)->delay(value); });
+                              { ((AudioEffectEnvelope *)audioStream)->delay(value); });
         pAttack = addParameter("Atk", 3, 0, 1000, envelope, [](AudioStream *audioStream, float value)
                                { ((AudioEffectEnvelope *)audioStream)->attack(value); });
         pHold = addParameter("Hld", 0, 0, 1000, envelope, [](AudioStream *audioStream, float value)
-                               { ((AudioEffectEnvelope *)audioStream)->hold(value); });
+                             { ((AudioEffectEnvelope *)audioStream)->hold(value); });
         pDecay = addParameter("Dcy", 0, 0, 1000, envelope, [](AudioStream *audioStream, float value)
-                               { ((AudioEffectEnvelope *)audioStream)->decay(value); });
+                              { ((AudioEffectEnvelope *)audioStream)->decay(value); });
         pSustain = addParameter("Sus", 50, 0, 100, envelope, [](AudioStream *audioStream, float value)
-                               { ((AudioEffectEnvelope *)audioStream)->sustain(value / 100); });
+                                { ((AudioEffectEnvelope *)audioStream)->sustain(value / 100); });
         pRelease = addParameter("Rel", 3, 0, 1000, envelope, [](AudioStream *audioStream, float value)
-                               { ((AudioEffectEnvelope *)audioStream)->release(value); });
+                                { ((AudioEffectEnvelope *)audioStream)->release(value); });
         pAmount = addParameter("Amt", 1.0, 0, 1);
 
         _envelope = envelope;
@@ -41,22 +41,6 @@ public:
     FLASHMEM void connectOutput(AudioStream *dest, uint8_t channel) { _connections.push_back(new AudioConnection(*_envelope, 0, *dest, channel)); }
     FLASHMEM void noteOn() { _envelope->noteOn(); }
     FLASHMEM void noteOff() { _envelope->noteOff(); }
-
-    // PSEnvelope::update()
-    // If any parameters for the envelope changed,
-    // copy to the AudioEnvelope
-    bool updateFromControl() override
-    {
-        for (auto parameter : params)
-        {
-            if (parameter != nullptr)
-            {
-                if (parameter->didChange())
-                    parameter->callTarget();
-            }
-        }
-        return PSComponent::updateFromControl();
-    }
 
     void attachControllers(Controls *c) override
     {
@@ -75,7 +59,6 @@ public:
     }
 
 protected:
-
 private:
     AudioSynthWaveformDc *_carrier;
     AudioEffectEnvelope *_envelope;
