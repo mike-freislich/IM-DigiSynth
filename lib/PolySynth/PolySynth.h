@@ -8,7 +8,6 @@
 #include <SerialFlash.h>
 #include <patching.h>
 #include "PSPatchManager.h"
-#include "DSLFO.h"
 #include "PSLFO.h"
 #include "waveshaperTables.h"
 #include "PSVoicePart.h"
@@ -18,8 +17,6 @@
 #include "PSMaths.h"
 
 #define AMPLITUDE (1.0)
-
-
 
 const float noteFreqs[128] PROGMEM = {
     8.176f, 8.662f, 9.177f, 9.723f, 10.301f,
@@ -63,58 +60,45 @@ struct StereoLevels
     StereoLevels(float left, float right) : left(left), right(right) {}
 };
 
-
-
-class PolySynth
+class PolySynth: public PSComponent
 {
 public:
-    PSLFO *filterLFO;
-    PSLFO *filterLFO2;
-    DSLFO *pitchLFO;
-    DSLFO *pitchLFO2;
-
+    
+    PSLFO *LFO1;
+    PSLFO *LFO2;    
+    PSLFO *LFO3;
+    PSLFO *LFO4;
     PSVoice voice1 = PSVoice("Voice1");
 
-    PolySynth() { }
+    PolySynth() : PSComponent(F("PolySynth")) { }
     ~PolySynth() {}
 
     void init()
     {
         AudioMemory(32);
-        // filterLFO = new DSLFO(WAVEFORM_TRIANGLE, 0.05, 1.0);
-        // filterLFO->addConnectionOut(&filter1modMixer, 1);
-        // filterLFO->addConnectionOut(&filter2modMixer, 1);
-        filterLFO2 = new PSLFO(F("Filter-LFO1"));// WAVEFORM_TRIANGLE, 0.05, 1.0);
-        filterLFO2->setWaveForm(WAVEFORM_TRIANGLE);
-        filterLFO2->setAmplitude(0.2f);
-        filterLFO2->setFrequency(36.0f);
-        filterLFO2->attachSend(&filter1modMixer, 2);
-        filterLFO2->attachSend(&filter2modMixer, 2);
-        //filterLFO2->
-        // filterLFO2 = new DSLFO(WAVEFORM_TRIANGLE, 36, 0.2);
-        //filterLFO2->addConnectionOut(&filter1modMixer, 2);
-        //filterLFO2->addConnectionOut(&filter2modMixer, 2);
+                
+        LFO1 = new PSLFO(F("Filter-LFO1"), &filter1modMixer, 1, this);
+        LFO2 = new PSLFO(F("Filter-LFO2"), &filter2modMixer, 1, this);        
+        LFO3 = new PSLFO(F("Pitch-LFO1"), &osc1FMmixer, 1, this);
+        LFO4 = new PSLFO(F("Pitch-LFO2"), &osc2FMmixer, 1, this);
 
-        filter1blockMixer.gain(0, 0);
-        filter1blockMixer.gain(1, 0);
-        filter1blockMixer.gain(2, 0);
+        addChild(&voice1);
+        addChild(LFO1);
+        addChild(LFO2);
+        addChild(LFO3);
+        addChild(LFO4);
+
+        
+        waveformLeft.frequencyModulation(2);
+        waveformRight.frequencyModulation(2);
+
+        initMixer(filter1blockMixer, 0);
         filter1blockMixer.gain(3, 1);
-        filter2blockMixer.gain(0, 0);
-        filter2blockMixer.gain(1, 0);
-        filter2blockMixer.gain(2, 0);
+        initMixer(filter2blockMixer, 0);
         filter2blockMixer.gain(3, 1);
         HPFdc.amplitude(10);
         hpf1.resonance(0);
         hpf2.resonance(0);
-
-        // pitchLFO = new DSLFO(WAVEFORM_SAMPLE_HOLD, 32, 0.005);
-        // pitchLFO->addConnectionOut(&osc1mod, 0);
-        // pitchLFO->addConnectionOut(&osc2modMixer, 0);
-        // pitchLFO2 = new DSLFO(WAVEFORM_SINE, 0.2, 1);
-        // pitchLFO2->addConnectionOut(&osc1modMixer, 1);
-        // pitchLFO2->addConnectionOut(&osc2modMixer, 1);        
-        // this->osc1_PEnv.setParameters(5, 15, 130, 0, 0);
-        // this->osc2_PEnv.setParameters(5, 15, 130, 0, 0);
 
         voiceMainLeftmixer.gain(0, 1.0);
         voiceMainLeftmixer.gain(1, 1.0);
@@ -141,8 +125,8 @@ public:
         ladder2.resonance(0.8);
         voiceFENVdc.amplitude(1);
 
-        waveformLeft.phaseModulation(30);
-        waveformRight.phaseModulation(45);
+        //waveformLeft.phaseModulation(30);
+        //waveformRight.phaseModulation(45);
 
         voiceAENVdc.amplitude(1);
         voicePENVdc.amplitude(1);
@@ -172,6 +156,12 @@ public:
         // dco1 = new PSDCO("DCO1", &AENV1, &filter1env, &osc1PENV);
         // dco1->set(PSEnvelopeParam::PSP_ENV_AMOUNT, 0.0);
         // dco1->params[PSEnvelopeParam::PSP_ENV_AMOUNT]->value;        
+    }
+
+    void initMixer(AudioMixer4 mixer, float gain)
+    {
+        for (uint8_t i = 0; i < 4; i ++)        
+            mixer.gain(i, gain);        
     }
 
     void playNote(uint8_t midiNote, uint8_t velocity)
@@ -309,7 +299,8 @@ public:
 
     void savePatch(uint16_t patchNo) 
     {   
-        String data = voice1.toString();
+        String data = this->toString();
+        Serial.println(data);
         patchManager.savePatch("patch000.psp", data);
     }
 
@@ -317,7 +308,7 @@ public:
     {
         String data = patchManager.loadPatch("patch000.psp");
         if (data)
-            voice1.fromString(data);
+            this->fromString(data);
 
     }
 private:
@@ -325,15 +316,6 @@ private:
     uint8_t waveIndex;
     float _detune;
     float _balance;
-
-    // template <typename T>
-    // FLASHMEM T clamp(T a, T minValue, T maxValue)
-    // {
-    //     a = max(a, minValue);
-    //     a = min(a, maxValue);
-    //     return a;
-    // }
-
 };
 
 #endif

@@ -75,24 +75,6 @@ public:
     }
 
 protected:
-    void updateAudioStreamComponent() override
-    {
-        // // Serial.println(F("updating envelope component"));
-        // //_envelope->delay(params[PSP_ENV_DELAY]->getValue());
-        // //_envelope->attack(params[PSP_ENV_ATTACK]->getValue());
-        // //_envelope->hold(params[PSP_ENV_HOLD]->getValue());
-        // //_envelope->decay(params[PSP_ENV_DECAY]->getValue());
-        // //_envelope->sustain(params[PSP_ENV_SUSTAIN]->getValue() / 100);
-        // //_envelope->release(params[PSP_ENV_RELEASE]->getValue());
-
-        // Serial.printf("d %2.2f, a %2.2f, h %2.2f, d %2.2f, s %2.2f, r %2.2f\n",
-        //               params[PSP_ENV_DELAY]->getValue(),
-        //               params[PSP_ENV_ATTACK]->getValue(),
-        //               params[PSP_ENV_HOLD]->getValue(),
-        //               params[PSP_ENV_DECAY]->getValue(),
-        //               params[PSP_ENV_SUSTAIN]->getValue() / 100,
-        //               params[PSP_ENV_RELEASE]->getValue());
-    }
 
 private:
     AudioSynthWaveformDc *_carrier;

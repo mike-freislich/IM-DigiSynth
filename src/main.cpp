@@ -68,12 +68,12 @@ FLASHMEM void setup()
 #ifdef RUNTESTS
   runTests();
 #endif  
-  polySynth.loadPatch(0);
-  //Serial.println(polySynth.voice1.toString());
+  polySynth.loadPatch(0);  
   seq.setTempo(SEQ_TEMPO, 8);
   seq.play();
   display.nextScene();
   threads.addThread(synthLoop);
+  //Serial.println(polySynth.voice1.toString());
 }
 
 void refreshDisplay() { display.render(); }

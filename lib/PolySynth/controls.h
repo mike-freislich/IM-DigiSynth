@@ -7,7 +7,7 @@
 #define NUMPOTS 4
 #define POT_AVERAGE_SAMPLING 16
 #define POT_RESOLUTION 4
-#define POT_RANGE_MIN 0
+#define POT_RANGE_MIN 10
 #define POT_RANGE_MAX 980
 #define PIN_POTA A3
 #define PIN_POTB A2

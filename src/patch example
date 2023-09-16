@@ -1,0 +1,69 @@
+*PolySynth
+{
+    *Voice1
+    {
+        A-Env Level:1.00,
+        P-Env Level:1.00,
+        F-Env Level:1.00,
+        X-Mod 1->2:1.00,
+        X-Mod 2->1:1.00,
+        Ring Mod Level:1.00,
+        Ring Mod Freq:500.00,
+        Shaper wave:1.00 
+        *PART1
+        {
+            waveform:1.00,
+            FM Octaves:10.00
+            *A-ENV{Del:0.00,Atk:3.00,Hld:0.00,Dcy:0.00,Sus:50.00,Rel:3.00,Amt:1.00}
+            *F-ENV{Del:0.00,Atk:3.00,Hld:0.00,Dcy:0.00,Sus:50.00,Rel:3.00,Amt:1.00}
+            *P-ENV{Del:0.00,Atk:3.00,Hld:0.00,Dcy:0.00,Sus:50.00,Rel:3.00,Amt:1.00}
+        }
+        *PART2
+        {
+            waveform:1.00,
+            FM Octaves:10.00
+            *A-ENV{Del:0.00,Atk:3.00,Hld:0.00,Dcy:0.00,Sus:50.00,Rel:3.00,Amt:1.00}
+            *F-ENV{Del:0.00,Atk:3.00,Hld:0.00,Dcy:0.00,Sus:50.00,Rel:3.00,Amt:1.00}
+            *P-ENV{Del:0.00,Atk:3.00,Hld:0.00,Dcy:0.00,Sus:50.00,Rel:3.00,Amt:1.00}
+        }
+    }
+    *Filter-LFO1{Shape:2.00,Amp:1.00,Rate:0.20}
+    *Filter-LFO2{Shape:2.00,Amp:1.00,Rate:0.20}
+    *Pitch-LFO1{Shape:2.00,Amp:1.00,Rate:0.20}
+    *Pitch-LFO2{Shape:2.00,Amp:1.00,Rate:0.20}
+
+
+#------------------------------------------------------------------------------------------
+
+*PolySynth
+{
+    *Voice1
+    {
+        A-Env Level:1.00,
+        P-Env Level:1.00,
+        F-Env Level:1.00,
+        X-Mod 1->2:0.00,
+        X-Mod 2->1:0.00,
+        Ring Mod Level:0.11,
+        Ring Mod Freq:303.09,
+        Shaper wave:5.96
+        *PART1
+        {
+            waveform:2.76,FM Octaves:2.62
+            *A-ENV{Del:0.00,Atk:0.00,Hld:0.00,Dcy:83.51,Sus:23.20,Rel:3.00,Amt:1.00}
+            *F-ENV{Del:0.00,Atk:0.00,Hld:0.00,Dcy:78.35,Sus:0.00,Rel:3.00,Amt:1.00}
+            *P-ENV{Del:0.00,Atk:28.87,Hld:0.00,Dcy:147.42,Sus:0.00,Rel:3.00,Amt:1.00}
+        }
+        *PART2
+        {
+            waveform:0.00,FM Octaves:2.65
+            *A-ENV{Del:0.00,Atk:7.22,Hld:0.00,Dcy:180.41,Sus:0.00,Rel:0.00,Amt:1.00}
+            *F-ENV{Del:0.00,Atk:59.79,Hld:0.00,Dcy:138.14,Sus:50.00,Rel:3.00,Amt:1.00}
+            *P-ENV{Del:0.00,Atk:79.38,Hld:0.00,Dcy:342.27,Sus:0.00,Rel:0.00,Amt:1.00}
+        }
+    }
+    *Filter-LFO1{Shape:3.54,Amp:0.00,Rate:0.20}
+    *Filter-LFO2{Shape:2.00,Amp:0.49,Rate:9.28}
+    *Pitch-LFO1{Shape:3.76,Amp:0.00,Rate:0.20}
+    *Pitch-LFO2{Shape:0.00,Amp:0.00,Rate:0.20}
+}

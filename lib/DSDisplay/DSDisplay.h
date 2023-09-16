@@ -50,25 +50,25 @@ public:
     }
 
     void setupScenes()
-    {
-        PSVoicePart *dco1 = synth->voice1.part1;
-        PSVoicePart *dco2 = synth->voice1.part2;
-        PSLFO *filterLFO1 = synth->filterLFO2;
-
-//      PSLFO *filterLFO = new PSLFO()
-        
+    {       
         tft.setFont(FONT_UI_LABEL);
-        addScene(new DSTestScene(&tft));
+        //addScene(new DSTestScene(&tft));
         addScene(new DSSceneVoice(&tft));
+        addScene(new DSParamEdit(&tft, synth));
         addScene(new DSParamEdit(&tft, &synth->voice1));
-        addScene(new DSParamEdit(&tft, dco1));
-        addScene(new DSParamEdit(&tft, filterLFO1));
-        addScene(new DSSceneEnvelope(&tft, F("OSC1 - A-ENV"), dco1->vca_env, _controls));
-        addScene(new DSSceneEnvelope(&tft, F("OSC1 - F-ENV"), dco1->vcf_env, _controls));
-        addScene(new DSSceneEnvelope(&tft, F("OSC1 - P-ENV"), dco1->mod_env, _controls));
-        addScene(new DSSceneEnvelope(&tft, F("OSC2 - A-ENV"), dco2->vca_env, _controls));
-        addScene(new DSSceneEnvelope(&tft, F("OSC2 - F-ENV"), dco2->vcf_env, _controls));
-        addScene(new DSSceneEnvelope(&tft, F("OSC2 - P-ENV"), dco2->mod_env, _controls));
+        addScene(new DSParamEdit(&tft, synth->voice1.part1));
+        addScene(new DSParamEdit(&tft, synth->LFO1));
+        addScene(new DSParamEdit(&tft, synth->LFO3));
+        addScene(new DSParamEdit(&tft, synth->voice1.part2));        
+        addScene(new DSParamEdit(&tft, synth->LFO2));
+        addScene(new DSParamEdit(&tft, synth->LFO4));
+        
+        addScene(new DSSceneEnvelope(&tft, F("OSC1 - A-ENV"), synth->voice1.part1->vca_env, _controls));
+        addScene(new DSSceneEnvelope(&tft, F("OSC1 - F-ENV"), synth->voice1.part1->vcf_env, _controls));
+        addScene(new DSSceneEnvelope(&tft, F("OSC1 - P-ENV"), synth->voice1.part1->mod_env, _controls));
+        addScene(new DSSceneEnvelope(&tft, F("OSC2 - A-ENV"), synth->voice1.part2->vca_env, _controls));
+        addScene(new DSSceneEnvelope(&tft, F("OSC2 - F-ENV"), synth->voice1.part2->vcf_env, _controls));
+        addScene(new DSSceneEnvelope(&tft, F("OSC2 - P-ENV"), synth->voice1.part2->mod_env, _controls));
 
         scenes[sceneIndex]->show();
 
