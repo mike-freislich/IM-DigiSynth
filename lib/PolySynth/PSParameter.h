@@ -138,7 +138,7 @@ public:
         switch (displayMode)
         {
         case asDECIMAL:
-            result = (_value < 100) ? String((float)(getValue())) : String((int)getValue());
+            result = (_value < 10) ? String((float)(getValue())) : String((int)getValue());
             break;
         case asINTEGER:
             result = String((int)getValue());
