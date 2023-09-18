@@ -33,8 +33,7 @@ public:
         lcd->setFont(font);
         setTextDimensions(name);
         Rect b = getBounds();
-        setBounds(b.x, b.y, textSize.width, textSize.height);
-        //Serial.printf("SuperClass [%s]: onDidChange() called!\n", name.c_str());
+        setBounds(b.x, b.y, textSize.width, textSize.height);        
     }
 
     void didSetParent(DSElement *parent) override
@@ -49,15 +48,18 @@ protected:
 
     void drawText()
     {
-        Rect r = this->dockedBounds();
-        // Serial.printf("BOUNDS %s, x=%d, y=%d, w=%d, h=%d\n", this->name.c_str(), r.x, r.y, r.width, r.height);
-        
+        Rect r = this->dockedBounds();    
         lcd->setFont(font);
         lcd->setTextDatum(datum);
 
         if (lastValue.length() > 0 && lastValue != name)
-            lcd->fillRect(lastBounds.x, lastBounds.y, lastBounds.width, lastBounds.height, color.background);                    
-        
+        {        
+            uint16_t c = (parent != nullptr) ?
+                ((this->selected) ? parent->color.backgroundHighlight : parent->color.background) :
+                ((this->selected) ? color.backgroundHighlight : color.background);            
+            
+            lcd->fillRect(lastBounds.x, lastBounds.y, lastBounds.width+1, lastBounds.height, c);                  
+        }        
         lcd->setCursor(r.x, r.y);
         lcd->setTextColor(selected ? color.textHighLight : color.text);
         lcd->print(name.c_str());
@@ -72,7 +74,6 @@ protected:
         lcd->setFont(font);
         lcd->getTextBounds(s, 0, 0, &x1, &y1, &w, &h);
         textSize = Dimensions(w, h);
-        // Serial.printf("getTextDimensions : '%s', w=%d, h=%d\n", s.c_str(), w, h);
         return textSize;
     }
 };

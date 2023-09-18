@@ -60,25 +60,25 @@ struct StereoLevels
     StereoLevels(float left, float right) : left(left), right(right) {}
 };
 
-class PolySynth: public PSComponent
+class PolySynth : public PSComponent
 {
 public:
-    
     PSLFO *LFO1;
-    PSLFO *LFO2;    
+    PSLFO *LFO2;
     PSLFO *LFO3;
     PSLFO *LFO4;
     PSVoice voice1 = PSVoice("Voice1");
+    String patchName = F("My Patch 001");
 
-    PolySynth() : PSComponent(F("PolySynth")) { }
+    PolySynth() : PSComponent(F("PolySynth")) {}
     ~PolySynth() {}
 
     void init()
     {
-        AudioMemory(32);
-                
+        AudioMemory(64);
+
         LFO1 = new PSLFO(F("Filter-LFO1"), &filter1modMixer, 1, this);
-        LFO2 = new PSLFO(F("Filter-LFO2"), &filter2modMixer, 1, this);        
+        LFO2 = new PSLFO(F("Filter-LFO2"), &filter2modMixer, 1, this);
         LFO3 = new PSLFO(F("Pitch-LFO1"), &osc1FMmixer, 1, this);
         LFO4 = new PSLFO(F("Pitch-LFO2"), &osc2FMmixer, 1, this);
 
@@ -88,48 +88,22 @@ public:
         addChild(LFO3);
         addChild(LFO4);
 
-        
         waveformLeft.frequencyModulation(2);
         waveformRight.frequencyModulation(2);
 
-        initMixer(filter1blockMixer, 0);
-        filter1blockMixer.gain(3, 1);
-        initMixer(filter2blockMixer, 0);
-        filter2blockMixer.gain(3, 1);
+        initMixer(filter1blockMixer, 0, 0, 0, 1); // hp, bp, lp, ladder
+        initMixer(filter2blockMixer, 0, 0, 0, 1); // hp, bp, lp, ladder
         HPFdc.amplitude(10);
         hpf1.resonance(0);
         hpf2.resonance(0);
 
-        voiceMainLeftmixer.gain(0, 1.0);
-        voiceMainLeftmixer.gain(1, 1.0);
-        voiceMainLeftmixer.gain(2, 1.0);
-        voiceMainLeftmixer.gain(3, 1.0);
-        voiceMainRightmixer.gain(0, 1.0);
-        voiceMainRightmixer.gain(1, 1.0);
-        voiceMainRightmixer.gain(2, 1.0);
-        voiceMainRightmixer.gain(3, 1.0);
-        osc1FMmixer.gain(0, 1.0);
-        osc1FMmixer.gain(1, 1.0);
-        osc1FMmixer.gain(2, 1.0);
-        osc1FMmixer.gain(3, 1.0);
-        osc2FMmixer.gain(0, 1.0);
-        osc2FMmixer.gain(1, 1.0);
-        osc2FMmixer.gain(2, 1.0);
-        osc2FMmixer.gain(3, 1.0);
+        initMixer(voiceMainLeftmixer, 1.0);
+        initMixer(voiceMainRightmixer, 1.0);
+        initMixer(osc1FMmixer, 1.0);
+        initMixer(osc2FMmixer, 1.0);
 
-        // filter
-        // voice1.dco1->vcf_env->set(10, 0, 130, 0, 0);
-        // osc1_FEnv.setParameters(10, 0, 130, 0, 0);
-        // osc2_FEnv.setParameters(10, 0, 130, 0, 0);
         ladder1.resonance(0.8);
         ladder2.resonance(0.8);
-        voiceFENVdc.amplitude(1);
-
-        //waveformLeft.phaseModulation(30);
-        //waveformRight.phaseModulation(45);
-
-        voiceAENVdc.amplitude(1);
-        voicePENVdc.amplitude(1);
 
         voiceGainLeft.gain(1.0);
         voiceGainRight.gain(1.0);
@@ -150,29 +124,36 @@ public:
         xmod(0, 0.5);
         xmod(1, 0.5);
 
+        initParameters();
+
         AudioProcessorUsageMaxReset();
         AudioMemoryUsageMaxReset();
-
-        // dco1 = new PSDCO("DCO1", &AENV1, &filter1env, &osc1PENV);
-        // dco1->set(PSEnvelopeParam::PSP_ENV_AMOUNT, 0.0);
-        // dco1->params[PSEnvelopeParam::PSP_ENV_AMOUNT]->value;        
     }
 
-    void initMixer(AudioMixer4 mixer, float gain)
+    void initParameters()
     {
-        for (uint8_t i = 0; i < 4; i ++)        
-            mixer.gain(i, gain);        
+        addParameter(
+            "Detune Amount", 0.1f, 0.0f, 2.0f, this, [](PSComponent *c, float v)
+            { ((PolySynth *)c)->setDetune(v); },
+            asPERCENTAGE);
+    }
+
+    void initMixer(AudioMixer4 mixer, float gain) { initMixer(mixer, gain, gain, gain, gain); }
+    void initMixer(AudioMixer4 mixer, float gain1, float gain2, float gain3, float gain4)
+    {
+        mixer.gain(0, gain1);
+        mixer.gain(0, gain2);
+        mixer.gain(0, gain3);
+        mixer.gain(0, gain4);
+    }
+
+    void setDetune(float v)
+    {
+        _detune = v;
     }
 
     void playNote(uint8_t midiNote, uint8_t velocity)
     {
-        uint32_t now = millis();
-        if (now - waveTimer > 10000)
-        {
-            waveTimer = now;
-            //nextWaveForm();
-        }
-
         AudioNoInterrupts();
         waveformLeft.begin(AMPLITUDE * velocity2amplitude[velocity], noteFreqs[midiNote] - _detune, (uint16_t)voice1.part1->params[0]->getValue());
         waveformRight.begin(AMPLITUDE * velocity2amplitude[velocity], noteFreqs[midiNote] + _detune, waves[waveIndex]); // detune
@@ -190,30 +171,32 @@ public:
 
     void stopNote()
     {
-        // voice1.dco1->vca_env->noteOn();
-        // voice1.dco1->vcf_env->noteOn();
-        // voice1.dco1->mod_env->noteOn();
-        // voice1.dco2->vca_env->noteOn();
-        // voice1.dco2->vcf_env->noteOn();
-        // voice1.dco2->mod_env->noteOn();       
+        AudioNoInterrupts();
+        voice1.part1->mod_env->noteOff();
+        voice1.part1->vca_env->noteOff();
+        voice1.part1->vcf_env->noteOff();
+        voice1.part2->mod_env->noteOff();
+        voice1.part2->vca_env->noteOff();
+        voice1.part2->vcf_env->noteOff();
+        AudioInterrupts();
     }
 
     StereoLevels getPeakLevel()
     {
         return StereoLevels(peakLeft.read(), peakRight.read());
-    }    
+    }
 
 #pragma region Synth Init
 
     FLASHMEM void initOscMixer()
     {
-        osc1waveMixer.gain(0, 0.5); // waveform osc1 left
-        osc1waveMixer.gain(1, 1.0); // waveform osc1 post AM left
+        osc1waveMixer.gain(0, 0.5);  // waveform osc1 left
+        osc1waveMixer.gain(1, 1.0);  // waveform osc1 post AM left
         osc1waveMixer.gain(2, 0.01); // white noise left
         osc1waveMixer.gain(3, 0.01); // pink noise left
 
-        osc2waveMixer.gain(0, 0.5); // waveform osc2 right
-        osc2waveMixer.gain(1, 1.0); // waveform osc2 post AM left
+        osc2waveMixer.gain(0, 0.5);  // waveform osc2 right
+        osc2waveMixer.gain(1, 1.0);  // waveform osc2 post AM left
         osc2waveMixer.gain(2, 0.01); // white noise right
         osc2waveMixer.gain(3, 0.01); // pink noise right
     }
@@ -297,8 +280,8 @@ public:
 
 #pragma endregion
 
-    void savePatch(uint16_t patchNo) 
-    {   
+    void savePatch(uint16_t patchNo)
+    {
         String data = this->toString();
         Serial.println(data);
         patchManager.savePatch("patch000.psp", data);
@@ -309,8 +292,8 @@ public:
         String data = patchManager.loadPatch("patch000.psp");
         if (data)
             this->fromString(data);
-
     }
+
 private:
     uint32_t waveTimer;
     uint8_t waveIndex;

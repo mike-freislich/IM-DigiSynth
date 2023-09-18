@@ -3,7 +3,6 @@
 
 #include <ILI9341_t3n.h>
 #include <vector>
-#include <XPT2046_Touchscreen.h>
 
 #include <DSButton.h>
 #include <DSPanel.h>

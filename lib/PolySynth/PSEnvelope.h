@@ -3,7 +3,6 @@
 
 #include "Audio.h"
 #include "PSComponent.h"
-#include "PSParamaterTargets.h"
 
 enum PSEnvelopeParam
 {
@@ -20,19 +19,31 @@ class PSEnvelope : public PSComponent
 {
 public:
     PSEnvelope(String name, AudioEffectEnvelope *envelope) : PSComponent(name)
-    {
-        pDelay = addParameter("Del", 0, 0, 1000, envelope, [](AudioStream *audioStream, float value)
-                              { ((AudioEffectEnvelope *)audioStream)->delay(value); });
-        pAttack = addParameter("Atk", 3, 0, 1000, envelope, [](AudioStream *audioStream, float value)
-                               { ((AudioEffectEnvelope *)audioStream)->attack(value); });
-        pHold = addParameter("Hld", 0, 0, 1000, envelope, [](AudioStream *audioStream, float value)
-                             { ((AudioEffectEnvelope *)audioStream)->hold(value); });
-        pDecay = addParameter("Dcy", 0, 0, 1000, envelope, [](AudioStream *audioStream, float value)
-                              { ((AudioEffectEnvelope *)audioStream)->decay(value); });
-        pSustain = addParameter("Sus", 50, 0, 100, envelope, [](AudioStream *audioStream, float value)
-                                { ((AudioEffectEnvelope *)audioStream)->sustain(value / 100); });
-        pRelease = addParameter("Rel", 3, 0, 1000, envelope, [](AudioStream *audioStream, float value)
-                                { ((AudioEffectEnvelope *)audioStream)->release(value); });
+    {        
+        pDelay = addParameter(
+            "Del", 0, 0, 1000, envelope, [](AudioStream *audioStream, float value)
+            { ((AudioEffectEnvelope *)audioStream)->delay(value); },
+            asDECIMAL);
+        pAttack = addParameter(
+            "Atk", 3, 0, 1000, envelope, [](AudioStream *audioStream, float value)
+            { ((AudioEffectEnvelope *)audioStream)->attack(value); },
+            asDECIMAL);
+        pHold = addParameter(
+            "Hld", 0, 0, 1000, envelope, [](AudioStream *audioStream, float value)
+            { ((AudioEffectEnvelope *)audioStream)->hold(value); },
+            asDECIMAL);
+        pDecay = addParameter(
+            "Dcy", 0, 0, 1000, envelope, [](AudioStream *audioStream, float value)
+            { ((AudioEffectEnvelope *)audioStream)->decay(value); },
+            asDECIMAL);
+        pSustain = addParameter(
+            "Sus", 50, 0, 100, envelope, [](AudioStream *audioStream, float value)
+            { ((AudioEffectEnvelope *)audioStream)->sustain(value / 100); },
+            asPERCENTAGE);
+        pRelease = addParameter(
+            "Rel", 3, 0, 1000, envelope, [](AudioStream *audioStream, float value)
+            { ((AudioEffectEnvelope *)audioStream)->release(value); },
+            asDECIMAL);
         pAmount = addParameter("Amt", 1.0, 0, 1);
 
         _envelope = envelope;
@@ -59,7 +70,6 @@ public:
     }
 
 protected:
-private:
     AudioSynthWaveformDc *_carrier;
     AudioEffectEnvelope *_envelope;
     PSParameter *pAttack, *pDecay, *pSustain, *pRelease, *pDelay, *pHold, *pAmount;

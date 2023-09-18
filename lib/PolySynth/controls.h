@@ -7,6 +7,7 @@
 #define NUMPOTS 4
 #define POT_AVERAGE_SAMPLING 16
 #define POT_RESOLUTION 4
+#define ANALOG_READ_BITS 10
 #define POT_RANGE_MIN 10
 #define POT_RANGE_MAX 980
 #define PIN_POTA A3
@@ -38,6 +39,7 @@ public:
     InputBase() {}
     InputBase(uint8_t pin, uint16_t debounceMillis = 10)
     {
+        analogReadResolution(ANALOG_READ_BITS);
         _pin = pin;
         _debounceMS = debounceMillis;
         _analogMin = -1;
@@ -80,13 +82,18 @@ protected:
     ControllerType controllerType = CT_NONE;
 };
 
+enum PotTaper
+{
+    linear,
+    audio
+};
+
 class Potentiometer : public InputBase
 {
 public:
-    Potentiometer()
-    {
-        controllerType = ControllerType::CT_POT;
-    }
+    PotTaper taper = linear;
+
+    Potentiometer() { controllerType = ControllerType::CT_POT; }
     Potentiometer(uint8_t pin) : InputBase(pin)
     {
         _analogMin = POT_RANGE_MIN;
@@ -98,15 +105,32 @@ public:
     bool setValue(int value)
     {
         if (value > _value + POT_RESOLUTION || value < _value - POT_RESOLUTION)
-        {
+        {            
             _value = value;
             return true;
         }
         return false;
     }
 
-    float getValue() override { return getLogValue(); }    
-    float getLogValue() { return (float)((_value * (_value + 1)) >> 10); } // 10bit resolution
+    float getValue() override
+    {
+        if (taper == audio)
+            return getLogValue();
+
+        return _value;
+    }
+    float getLogValue()
+    {        
+        // const float minLogValue = log10(1); 
+        // const float maxLogValue = log10(POT_RANGE_MAX);
+        // float logValue = minLogValue + (maxLogValue - minLogValue) * ((float)(_value) / POT_RANGE_MAX);        
+        // float audioTaperValue = (pow(10, logValue))-1;
+        // Serial.printf("POT AUDIO TAPER %2.2f\n", audioTaperValue);        
+        // return audioTaperValue;
+        float result =(_value * (_value + 1)) >> ANALOG_READ_BITS;
+        //Serial.printf("POT AUDIO TAPER %2.2f\n", result);
+        return result;
+    }
     void update() override { setValue(analogRead(_pin)); }
 
 protected:
@@ -192,7 +216,7 @@ public:
     {
         _value = clamp(_value, rangeMin, rangeMax);
         _analogMax = rangeMax;
-        _analogMin = rangeMin;        
+        _analogMin = rangeMin;
     }
 
     int getPosition()
@@ -212,7 +236,7 @@ public:
             rotating = false;
         }
     }
-    
+
     void isrB()
     {
         if (rotating)
@@ -228,7 +252,7 @@ public:
 
     void setValue(float value) override
     {
-        _value = value;        
+        _value = value;
     }
 
     void update()
@@ -243,10 +267,10 @@ public:
 
             if (_analogMax != _analogMin)
                 _value = clamp(_value, _analogMin, _analogMax);
-            //Serial.printf("range set : min %d, max %d\n", _analogMin, _analogMax);
-            //Serial.print("Index:");
-            //Serial.println(_value, DEC);
-            lastCounter = counter; 
+            // Serial.printf("range set : min %d, max %d\n", _analogMin, _analogMax);
+            // Serial.print("Index:");
+            // Serial.println(_value, DEC);
+            lastCounter = counter;
         }
     }
 

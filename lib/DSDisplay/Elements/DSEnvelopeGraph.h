@@ -18,8 +18,7 @@ public:
         color.border = ILI9341_WHITE;        
         color.background = ILI9341_BLACK;
         color.control = ILI9341_WHITE;
-        color.controlValue = ILI9341_GREENYELLOW;        
-        //this->_updateDelay = 1000 / 30; // 15 FPS max
+        color.controlValue = ILI9341_GREENYELLOW;                
     }
 
     ~DSEnvelopeGraph() { DSElement::~DSElement(); }

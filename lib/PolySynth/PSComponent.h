@@ -53,7 +53,7 @@ public:
         {
             if (param->name == parameterName)
             {
-                param->setValue(v, force);
+                param->setValue(v, force);                
                 return true;
             }
         }
@@ -84,7 +84,7 @@ public:
     }
 
     // accepts a config data string and sets the parameters of the component
-    void fromString(String data, int startIndex = 0)
+    void fromString(const String &data, int startIndex = 0)
     {
 #pragma region find first thisComponent in the data
         // Serial.printf("----> INSIDE COMPONENT '%s' <---\n", name.c_str());
@@ -138,14 +138,13 @@ public:
                 SplitStrings nameValuePair = splitString(pstring, ':');
                 if (nameValuePair.size() == 2)
                 {
-                    set(nameValuePair[0], nameValuePair[1].toFloat(), true);
+                    set(nameValuePair[0], nameValuePair[1].toFloat(), true);                    
                     // Serial.printf("setting %s->%s to %.2f\n", this->name.c_str(), nameValuePair[0].c_str(), nameValuePair[1].toFloat());
                 }
             }
         }
 #pragma endregion
-
-        // TODO this is finding all child components each time. Perhaps split data string that is handed to children?
+        
         // find all component blocks and pass them to each valid component
         if (children.size() > 0)
         {
@@ -171,20 +170,34 @@ public:
                     }
                 }
             }
-        }
+        }        
         this->updateFromControl();
     }
+    
 
-    PSParameter *addParameter(String name, float value, float rangeMin, float rangeMax, AudioStream *a, ParameterTarget t)
+    PSParameter *addParameter(String name, float value, float rangeMin, float rangeMax, PSComponent *c, ParameterTargetC t, PSDisplayMode displayMode = asINTEGER)
     {
-        PSParameter *newp = new PSParameter(name, value, rangeMin, rangeMax, a, t);
+        PSParameter *newp = (new PSParameter(c, t))->init(name, value, rangeMin, rangeMax, displayMode);
+        params.push_back(newp);
+        return newp; 
+    }
+
+    PSParameter *addParameter(String name, float value, float rangeMin, float rangeMax, AudioStream *a, ParameterTarget t, PSDisplayMode displayMode = asINTEGER)
+    {
+        PSParameter *newp = (new PSParameter(a,t))->init(name, value, rangeMin, rangeMax, displayMode);
+        params.push_back(newp);
+        return newp;
+    }
+
+    PSParameter *addParameter(PSParameter * newp)
+    {
         params.push_back(newp);
         return newp;
     }
 
     PSParameter *addParameter(String name, float value, float rangeMin, float rangeMax)
     {
-        return addParameter(name, value, rangeMin, rangeMax, nullptr, nullptr);
+        return addParameter(name, value, rangeMin, rangeMax, (AudioStream *)nullptr, nullptr);
     }
 
     FLASHMEM PSComponent *addChild(PSComponent *child)
@@ -206,24 +219,28 @@ public:
 
     virtual void attachControllers(Controls *c) {}
     virtual void detachControllers() {}
+    
     virtual bool updateFromControl()
-    {
-        
+    {   
+        bool result = false;
         for (auto parameter : params)
         {
             if (parameter != nullptr)
             {
                 if (parameter->didChange())
+                {
                     parameter->callTarget();
+                    result = true;
+                }
             }
         }
-        // return PSComponent::updateFromControl();
+
         if (controllersDidChange())
         {
             updateAudioStreamComponent();
-            return true;
-        }
-        return false;
+            result = true;
+        }        
+        return result;
     }
     virtual void updateAudioStreamComponent() {}
 

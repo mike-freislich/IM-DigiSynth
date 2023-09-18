@@ -63,7 +63,7 @@ public:
         if (param != nullptr)
         {
             txtName->setName(param->name);
-            txtValue->setName(param->displayValue());
+            txtValue->setName(param->displayValue());                          
         }
     }
 

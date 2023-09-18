@@ -21,7 +21,6 @@
 #define SCENE_DELAY 5000
 
 void refreshDisplay();
-void onDisplayUpdateTouch();
 void onSerialLogTimer();
 void monitorPeakOutput();
 void playStep(SeqStep *_steps[SEQ_TRACKS]);
@@ -29,7 +28,7 @@ void playStep(SeqStep *_steps[SEQ_TRACKS]);
 
 PolySynth polySynth = PolySynth();
 Sequencer seq = Sequencer(playStep);
-DSDisplay display = DSDisplay(onDisplayUpdateTouch, &polySynth, &controls);
+DSDisplay display = DSDisplay(&polySynth, &controls);
 
 SimpleTimer displayRefreshTimer(1000 / SCREEN_REFRESH_RATE, refreshDisplay);
 SimpleTimer audioOutPollTimer(1000 / SCREEN_REFRESH_RATE, monitorPeakOutput);
@@ -122,10 +121,10 @@ void onSerialLogTimer()
   Serial.print("\n");
 }
 
-void onDisplayUpdateTouch()
-{
-  display.updateTouch();
-}
+// void onDisplayUpdateTouch()
+// {
+//   display.updateTouch();
+// }
 
 FLASHMEM void playStep(SeqStep *steps[SEQ_TRACKS])
 {

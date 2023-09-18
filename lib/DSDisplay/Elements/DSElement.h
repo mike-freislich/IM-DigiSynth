@@ -105,21 +105,20 @@ public:
         setDidChange();
     }
 
+    DSElement *getParent() { return parent; }
+
 protected:
     String name = "";
     ILI9341_t3_font_t font = FONT_UI_LABEL;
     ILI9341_t3n *lcd;
     DSElementVector children;
     Dimensions textSize = Dimensions();
+    DSElement *parent = nullptr;
     bool didChange = true;
     bool visible = false;
     bool selected = false;
 
-    virtual void onDidChange()
-    {
-        didChange = true;
-        // Serial.printf("BaseClass [%s]: onDidChange() called!\n", name.c_str());
-    }
+    virtual void onDidChange() { didChange = true; }
 
     void drawBorder() { drawBorder(selected ? color.borderHighlight : color.border); }
     void drawBorder(uint16_t color)
@@ -135,8 +134,6 @@ protected:
     }
 
 private:
-    DSElement *parent = nullptr;
-
     void renderChildren()
     {
         for (auto e : children)
