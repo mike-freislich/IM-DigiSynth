@@ -2,22 +2,28 @@
 #define SIMPLETIMER_H
 #include <Arduino.h>
 
-struct SimpleTimer
+class SimpleTimer
 {
-  uint32_t last;
-  uint32_t freq;
-  void (*onTimerTickHandler)();
-  SimpleTimer(uint32_t timerFreq, void (*callback)()) : freq(timerFreq), onTimerTickHandler(callback) {}
-
-  void update()
+public:
+  SimpleTimer() {}
+  SimpleTimer(uint32_t duration, void (*callback)() = nullptr) : duration(duration), onTimerTickHandler(callback){};
+  bool update()
   {
     uint32_t now = millis();
-    if (now - last >= freq)
+    if (now > last + duration)
     {
-      onTimerTickHandler();
       last = now;
+      return true;
     }
+    return false;
   }
+  void reset() { last = millis(); }
+  void setDuration(uint32_t duration) { this->duration = duration; }
+
+private:
+  uint32_t duration = 0;
+  uint32_t last = 0;
+  void (*onTimerTickHandler)();
 };
 
 #endif

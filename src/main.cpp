@@ -126,7 +126,7 @@ void onSerialLogTimer()
 //   display.updateTouch();
 // }
 
-FLASHMEM void playStep(SeqStep *steps[SEQ_TRACKS])
+void playStep(SeqStep *steps[SEQ_TRACKS])
 {
   for (int i = 0; i < SEQ_TRACKS; i++)
   {

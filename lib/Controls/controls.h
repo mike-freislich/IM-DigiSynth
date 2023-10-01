@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 #include "PSMaths.h"
+#include "DigitalIO.h"
+#include "AnalogMux.h"
 
 #define NUMPOTS 4
 #define POT_AVERAGE_SAMPLING 16
@@ -332,12 +334,11 @@ protected:
         for (int i = 0; i < NUMENCODERS; i++)
             encoders[i].update();
     }
-};
+} controls;
 
-Controls controls;
-static void encoder1ISRA() { controls.encoders[0].isrA(); }
-static void encoder1ISRB() { controls.encoders[0].isrB(); }
-static void encoder2ISRA() { controls.encoders[1].isrA(); }
-static void encoder2ISRB() { controls.encoders[1].isrB(); }
+void encoder1ISRA() { controls.encoders[0].isrA(); }
+void encoder1ISRB() { controls.encoders[0].isrB(); }
+void encoder2ISRA() { controls.encoders[1].isrA(); }
+void encoder2ISRB() { controls.encoders[1].isrB(); }
 
 #endif

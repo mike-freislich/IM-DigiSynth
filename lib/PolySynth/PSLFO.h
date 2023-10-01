@@ -45,6 +45,7 @@ public:
             asDECIMAL);
         pFrequency->potTaper = PotTaper::audio;
 
+                
         addParameter(
             F("Rate Multiplier"), _frequencyMultiplier, 0.1, 10.0, this, [](PSComponent *c, float v)
             { ((PSLFO *)c)->setFrequencyMultiplier(v); },

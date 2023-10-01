@@ -42,7 +42,7 @@ public:
 protected:
     float min = 0;
     float max = 1;
-    float levelLeft, levelRight;
+    float levelLeft = 0, levelRight = 0;
     const uint8_t padding = 2;
 
     void drawMeter()

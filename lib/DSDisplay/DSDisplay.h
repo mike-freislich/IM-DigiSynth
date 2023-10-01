@@ -11,12 +11,15 @@
 
 #define TFT_DC 9
 #define TFT_CS 10
+//#define TFT_MOSI 11
+//#define TFT_MISO 12
+//#define TFT_SCK 13
+
 #define SCREEN_REFRESH_RATE 60
 //#include <XPT2046_Touchscreen.h>
 //#define TOUCH_CS 8
 //#define TIRQ_PIN 2
 //#define TOUCH_REFRESH_RATE 60
-
 
 class DSDisplay : public DSBounds
 {
