@@ -1,0 +1,21 @@
+#ifndef CONTROL_PINS_H
+#define CONTROL_PINS_H
+
+#define PIN_POTA A3
+#define PIN_POTB A2
+#define PIN_POTC A0
+#define PIN_POTD A1
+
+#define NUMBUTTONS 4
+#define PIN_TACTBUTTON_1 A8
+#define PIN_TACTBUTTON_2 A9
+#define PIN_ROTARY1_BUTTON A16
+#define PIN_ROTARY2_BUTTON A17
+
+#define NUMENCODERS 2
+#define PIN_ENC1_A A5
+#define PIN_ENC1_B A4
+#define PIN_ENC2_A A7
+#define PIN_ENC2_B A6
+
+#endif
