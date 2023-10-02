@@ -127,15 +127,15 @@ void onSerialLogTimer()
 
   printf(", cpu %2.2f, max %2.2f, temp %2.1f°C", cpu, maxCpu, tempmonGetTemp());
 
-  for (int i = 0; i < NUMPOTS; i++)
-  {
-    Potentiometer *p = &controls.pots[i];
-    printf(", pot[%2d] %3d", p->getPin(), p->getValue());
-  }
+  // for (int i = 0; i < NUMPOTS; i++)
+  // {
+  //   Potentiometer *p = &controls.pots[i];
+  //   printf(", pot[%2d] %3d", p->getPin(), p->getValue());
+  // }
   for (uint8_t i = 0; i < sizeof(buttonPinsActive); i++)
   {
     Button *b = &controls.buttons[i];
-    printf(", button[%2d] %d", b->getPin(), b->getValue());
+    printf(", button[%02d] %d", b->getPin(), b->getValue());
   }
 
   Serial.print("\n");

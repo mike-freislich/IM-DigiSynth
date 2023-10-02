@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <SimpleTimer.h>
 #define ANALOG_READ_BITS 10
-#define POT_AVERAGE_SAMPLING 16
+#define POT_AVERAGE_SAMPLING 32
 
 enum ControllerType
 {

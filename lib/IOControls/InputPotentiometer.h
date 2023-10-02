@@ -4,10 +4,10 @@
 #include <InputBase.h>
 #include <AnalogMux.h>
 
-#define NUMPOTS 4
-#define POT_RESOLUTION 4
+//#define NUMPOTS 4
+#define POT_RESOLUTION 2
 #define POT_RANGE_MIN 10
-#define POT_RANGE_MAX 980
+#define POT_RANGE_MAX 1014
 
 enum PotTaper
 {
@@ -31,10 +31,10 @@ public:
 
     bool setValue(int value)
     {
-        if (value > _value + POT_RESOLUTION || value < _value - POT_RESOLUTION)
+        if (value >= _value + POT_RESOLUTION || value <= _value - POT_RESOLUTION)
         {
             _value = value;
-            Serial.printf("POT %d - value changed to %d\n", _pin, _value);
+            Serial.printf("POT %02d - value changed to %04d\n", _pin, _value);
             return true;
         }
         return false;
