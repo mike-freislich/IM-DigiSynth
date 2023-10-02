@@ -37,8 +37,8 @@ public:
     {
         if (busCount < 8)
         {
-            PCF8575 *b = new PCF8575(addr);
-            if (b->begin())
+            PCF8575 *b = new PCF8575(addr, &Wire);
+            if (b->begin(B00000000))
             {
                 b->write16(buttonMask);
                 b->setButtonMask(buttonMask);
@@ -80,7 +80,13 @@ public:
     {
         uint8_t bus = 0, channel = 0;
         if (getDigitalBusChannel(gpioId, bus, channel))
-            return bitRead(busData[bus], channel);
+        {
+            //Serial.printf("UPDATING BUTTON FROM PINSTATE : bus=%d, channel=%d\n", bus, channel);
+            //Serial.printf("busdata[%d] = %d\n", bus, busData[bus]);
+            bool bitval = bitRead(busData[bus], channel);
+            //Serial.printf("BITVAL = %d\n", bitval);
+            return bitval;
+        }
 
         return false;
     }
@@ -90,10 +96,13 @@ public:
     void findAddress()
     {
         int count = 0;
-
+        Serial.println("searching for IO bus addresses");
         // loop through possible addresses
         for (int i = 1; i < 120; i++)
         {
+            
+            Wire.setSCL(A5);
+            Wire.setSDA(A4);
             Wire.beginTransmission(i);
             // returns 0 if device found
             if (Wire.endTransmission() == 0)
@@ -137,7 +146,7 @@ private:
             for (uint8_t i = 0; i < busCount; i++)
                 busData[i] = bus[i]->read16();
 
-            Serial.printf("GPIO changed : [0] %s - [1] %s\n", binary16(busData[0]).c_str(), binary16(busData[1]).c_str());
+            //Serial.printf("GPIO changed : [0] %s - [1] %s\n", binary16(busData[0]).c_str(), binary16(busData[1]).c_str());
         }
     }
 
@@ -154,6 +163,7 @@ private:
         return result;
     }
 } digitalIO;
+
 
 // ..............
 //

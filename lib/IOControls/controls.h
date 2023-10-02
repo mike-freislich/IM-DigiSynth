@@ -9,27 +9,33 @@
 #include <InputPotentiometer.h>
 #include <InputEncoder.h>
 #include <controlPins.h>
+#include <vector>
+
+typedef std::vector<Potentiometer> PotentiometerVector;
+typedef std::vector<Button> ButtonVector;
 
 class Controls
 {
 public:
-    Potentiometer pots[NUMPOTS] = {
-        Potentiometer(PIN_POTA),
-        Potentiometer(PIN_POTB),
-        Potentiometer(PIN_POTC),
-        Potentiometer(PIN_POTD)};
-
-    Button buttons[NUMBUTTONS] = {
-        Button(PIN_ROTARY1_BUTTON),
-        Button(PIN_ROTARY2_BUTTON),
-        Button(PIN_TACTBUTTON_1),
-        Button(PIN_TACTBUTTON_2)};
+    PotentiometerVector pots;
+    ButtonVector buttons;
 
     Encoder encoders[NUMENCODERS] = {
         Encoder(PIN_ENC1_A, PIN_ENC1_B, encoder1ISRA, encoder1ISRB),
         Encoder(PIN_ENC2_A, PIN_ENC2_B, encoder2ISRA, encoder2ISRB)};
 
-    Controls() { analogReadAveraging(POT_AVERAGE_SAMPLING); }
+    Controls()
+    {
+    }
+
+    void setup()
+    {
+        for (uint8_t i = 0; i < sizeof(potPinsActive); i++)
+            pots.push_back(Potentiometer(potPinsActive[i], IO_EXPANSION));
+
+        for (uint8_t x = 0; x < sizeof(buttonPinsActive); x++)
+            buttons.push_back(Button(buttonPinsActive[x], IO_EXPANSION));        
+    }
 
     void update()
     {
@@ -41,19 +47,20 @@ public:
 protected:
     void updatePots()
     {
-        for (int i = 0; i < NUMPOTS; i++)
+        for (uint8_t i = 0; i < sizeof(potPinsActive); i++)
             pots[i].update();
     }
     void updateButtons()
-    {
-        for (int i = 0; i < NUMBUTTONS; i++)
-            buttons[i].update();
+    {        
+        for (uint8_t i = 0; i < sizeof(buttonPinsActive); i++)        
+            buttons[i].update();                    
     }
     void updateEncoders()
     {
-        for (int i = 0; i < NUMENCODERS; i++)
+        for (uint8_t i = 0; i < NUMENCODERS; i++)
             encoders[i].update();
     }
+
 } controls;
 
 void encoder1ISRA() { controls.encoders[0].isrA(); }

@@ -2,7 +2,9 @@
 #define INPUT_BASE_H
 
 #include <Arduino.h>
+#include <SimpleTimer.h>
 #define ANALOG_READ_BITS 10
+#define POT_AVERAGE_SAMPLING 16
 
 enum ControllerType
 {
@@ -12,15 +14,21 @@ enum ControllerType
     CT_NONE
 };
 
+enum IOType
+{
+    IO_TEENSY,
+    IO_EXPANSION
+};
+
 class InputBase
 {
-public:
+public:   
     InputBase() {}
-    InputBase(uint8_t pin, uint16_t debounceMillis = 10)
+    InputBase(uint8_t pin, IOType ioType = IO_EXPANSION, uint16_t debounceMillis = 10): _pin(pin), ioType(ioType)
     {
         analogReadResolution(ANALOG_READ_BITS);
-        _pin = pin;
-        _debounceMS = debounceMillis;
+        analogReadAveraging(POT_AVERAGE_SAMPLING);             
+        debounceTimer.setDuration(debounceMillis);
         _analogMin = -1;
         _analogMax = -1;
     }
@@ -28,20 +36,16 @@ public:
 
     ControllerType getType() { return controllerType; }
 
-    void setDebounceTime(uint16_t ms = 10)
-    {
-        _debounceMS = ms;
-    }
+    void setDebounceTime(uint16_t ms = 10) { debounceTimer.setDuration(ms); }
+
+    void setIoType(IOType ioType) { this->ioType = ioType; }
 
     bool debounced()
     {
-        uint32_t now = millis();
-        if (now - _lastChanged > _debounceMS)
-        {
-            _lastChanged = now;
+        if (debounceTimer.update())
             return true;
-        }
-        return false;
+        else
+            return false;
     }
 
     virtual void update() {}
@@ -56,10 +60,9 @@ public:
 protected:
     uint8_t _pin;
     int _value, _analogMin, _analogMax;
-    uint16_t _debounceMS;
-    uint32_t _lastChanged;
     ControllerType controllerType = CT_NONE;
+    SimpleTimer debounceTimer;
+    IOType ioType = IO_EXPANSION;
 };
-
 
 #endif

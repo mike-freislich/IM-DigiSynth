@@ -25,6 +25,7 @@ public:
         pinMode(MXP_S3, OUTPUT);
         pinMode(MUXA_COM, INPUT);
         pinMode(MUXB_COM, INPUT);
+        analogReadResolution(10);
         analogReadAveraging(SAMPLEAVG);
     }
 

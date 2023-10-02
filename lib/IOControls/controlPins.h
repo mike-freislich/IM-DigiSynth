@@ -1,21 +1,67 @@
 #ifndef CONTROL_PINS_H
 #define CONTROL_PINS_H
 
-#define PIN_POTA A3
-#define PIN_POTB A2
-#define PIN_POTC A0
-#define PIN_POTD A1
+#pragma region MUX POTS
 
-#define NUMBUTTONS 4
-#define PIN_TACTBUTTON_1 A8
-#define PIN_TACTBUTTON_2 A9
-#define PIN_ROTARY1_BUTTON A16
-#define PIN_ROTARY2_BUTTON A17
+// envelope board (v1)
+#define POT_V1_Fader1 0
+#define POT_V1_Fader2 1
+#define POT_V1_Fader3 2
+#define POT_V1_Fader4 3
+#define POT_V1_EnvLevel 4
+#define POT_V1_Cutoff 5
+#define POT_V1_Resonance 6
 
+// vco board (v1)
+#define POT_V1_Waveform 7
+#define POT_V1_PulseWidth 8
+#define POT_V1_Tune 9
+#define POT_V1_Mix 10
+#define POT_V1_RingLevel 11
+#define POT_V1_RingFreq 12
+#define POT_V1_NoiseLevel 13
+#define POT_V1_Pan 14
+#define POT_V1_ShaperWave 15
+#define POT_V1_ShaperCurve 16
+#define POT_V1_XmodSend 17
+
+// display board : data pots
+#define POT_Data1 18
+#define POT_Data2 19
+#define POT_Data3 20
+#define POT_Data4 21
+
+const uint8_t PROGMEM potPinsActive[] = {POT_Data1, POT_Data2, POT_Data3, POT_Data4, POT_V1_Cutoff};
+
+#pragma endregion
+
+#pragma region Buttons
+
+// BUTTONS
+#define BTN_V1_NoiseType 10
+#define BTN_V1_EnvSelect 0
+#define BTN_Shift 1
+#define PIN_ROTARY1_BUTTON 2
+#define PIN_ROTARY2_BUTTON 3
+
+const uint8_t PROGMEM buttonPinsActive[] = {BTN_Shift, PIN_ROTARY1_BUTTON, PIN_ROTARY2_BUTTON, BTN_V1_EnvSelect, BTN_V1_NoiseType};
+//const uint16_t BUTTONMASK = word(B00000000, B00000011);
+// uint16_t GET_BUTTONMASK()
+// {
+//     uint16_t mask = 0;
+//     for (uint8_t i = 0; i < sizeof(buttonPinsActive); i ++)
+//     {        
+//         mask = bitSet(mask, buttonPinsActive[i]);
+//     }
+// }
+
+#pragma endregion
+
+// ENCODERS
 #define NUMENCODERS 2
-#define PIN_ENC1_A A5
-#define PIN_ENC1_B A4
-#define PIN_ENC2_A A7
-#define PIN_ENC2_B A6
+#define PIN_ENC1_A A6
+#define PIN_ENC1_B A7
+#define PIN_ENC2_A A8
+#define PIN_ENC2_B A9
 
 #endif

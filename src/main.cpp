@@ -25,16 +25,15 @@ void onSerialLogTimer();
 void monitorPeakOutput();
 void playStep(SeqStep *_steps[SEQ_TRACKS]);
 
-
 PolySynth polySynth = PolySynth();
 Sequencer seq = Sequencer(playStep);
 DSDisplay display = DSDisplay(&polySynth, &controls);
 
-SimpleTimer displayRefreshTimer(1000 / SCREEN_REFRESH_RATE, refreshDisplay);
-SimpleTimer audioOutPollTimer(1000 / SCREEN_REFRESH_RATE, monitorPeakOutput);
+SimpleCallbackTimer displayRefreshTimer(1000 / SCREEN_REFRESH_RATE, refreshDisplay);
+SimpleCallbackTimer audioOutPollTimer(1000 / SCREEN_REFRESH_RATE, monitorPeakOutput);
 
 #ifdef USB_MIDI_AUDIO_SERIAL
-SimpleTimer serialLogTimer(10000, onSerialLogTimer);
+SimpleCallbackTimer serialLogTimer(10000, onSerialLogTimer);
 
 void delayForSerial()
 {
@@ -59,20 +58,38 @@ FLASHMEM void setup()
   Serial.begin(115200);
 #endif
   display.begin();
-  polySynth.init();
-  display.setupScenes();
 #ifdef USB_MIDI_AUDIO_SERIAL
   delayForSerial();
 #endif
 #ifdef RUNTESTS
   runTests();
-#endif  
-  polySynth.loadPatch(0);  
+#endif
+
+  Serial.println("initialising Digital IO");
+
+  bool success = (digitalIO.addBus(PCF_ADDR0, word(B00000000, B11110000)) &&
+                  digitalIO.addBus(PCF_ADDR1, word(B00000000, B11110000)));
+
+  if (!success)
+  {
+    Serial.println(F("Error: Digital IO Bus Expansion failed to inititalise "));
+    printf("Usable busses %d and pins %d\n", digitalIO.getBusCount(), digitalIO.getPinCount());    
+  }
+
+  digitalIO.setDebounceTime(10);
+  digitalIO.begin();
+  controls.setup();
+  digitalIO.findAddress();
+
+  polySynth.init();
+  display.setupScenes();
+
+  polySynth.loadPatch(0);
   seq.setTempo(SEQ_TEMPO, 8);
   seq.play();
   display.nextScene();
   threads.addThread(synthLoop);
-  //Serial.println(polySynth.voice1.toString());
+  // Serial.println(polySynth.voice1.toString());
 }
 
 void refreshDisplay() { display.render(); }
@@ -87,12 +104,15 @@ FLASHMEM void loop()
 {
   displayRefreshTimer.update();
   audioOutPollTimer.update();
+  digitalIO.update();
   controls.update();
+  serialLogTimer.update();
 
   if (controls.buttons[0].didLongPress())
-    polySynth.savePatch(0);
-    
-  serialLogTimer.update();  
+  {
+    //   polySynth.savePatch(0);
+  }
+  
 
   delay(1);
 }
@@ -112,7 +132,7 @@ void onSerialLogTimer()
     Potentiometer *p = &controls.pots[i];
     printf(", pot[%2d] %3d", p->getPin(), p->getValue());
   }
-  for (int i = 0; i < NUMBUTTONS; i++)
+  for (uint8_t i = 0; i < sizeof(buttonPinsActive); i++)
   {
     Button *b = &controls.buttons[i];
     printf(", button[%2d] %d", b->getPin(), b->getValue());

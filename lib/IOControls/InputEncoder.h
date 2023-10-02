@@ -4,7 +4,7 @@
 #include <InputBase.h>
 #include "PSMaths.h"
 
-static const int8_t enc_states[] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0}; // Lookup table
+static const PROGMEM int8_t enc_states[] = {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0}; // Lookup table
 
 class Encoder : public InputBase
 {
