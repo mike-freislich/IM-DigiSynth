@@ -34,7 +34,7 @@ public:
         if (value >= _value + POT_RESOLUTION || value <= _value - POT_RESOLUTION)
         {
             _value = value;
-            Serial.printf("POT %02d - value changed to %04d\n", _pin, _value);
+            Serial.printf("POT %02d - value changed to %04d log(%04d)\n", _pin, _value, (int)getLogValue());
             return true;
         }
         return false;

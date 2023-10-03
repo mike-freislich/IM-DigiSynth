@@ -18,6 +18,7 @@ public:
     {
         // components
         voice1 = new PSVoice("Voice1", this);
+        
         //filterLFO = new PSLFO("Filter LFO", this); 
         //pitchLFO = new PSLFO("Pitch LFO", this);
         
@@ -25,7 +26,7 @@ public:
 
         
 
-    }    
+    } 
 };
 
 #endif

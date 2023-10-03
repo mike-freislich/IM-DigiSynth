@@ -16,6 +16,7 @@
 #include "controls.h"
 #include "MIDIUSB.h"
 #include "tests.h"
+#include "lights.h"
 
 #define ARDUINO_SERIAL_DELAY 5000
 #define SCENE_DELAY 5000
@@ -66,6 +67,8 @@ FLASHMEM void setup()
 #endif
 
   Serial.println("initialising Digital IO");
+  
+  
 
   bool success = (digitalIO.addBus(PCF_ADDR0, word(B00000000, B11110000)) &&
                   digitalIO.addBus(PCF_ADDR1, word(B00000000, B11110000)));
@@ -73,13 +76,14 @@ FLASHMEM void setup()
   if (!success)
   {
     Serial.println(F("Error: Digital IO Bus Expansion failed to inititalise "));
-    printf("Usable busses %d and pins %d\n", digitalIO.getBusCount(), digitalIO.getPinCount());    
+    printf("Usable busses %d and pins %d\n", digitalIO.busCount(), digitalIO.pinCount());    
   }
-
-  digitalIO.setDebounceTime(10);
   digitalIO.begin();
-  controls.setup();
+  digitalIO.setDebounceTime(10);
   digitalIO.findAddress();
+
+  controls.setup();
+  
 
   polySynth.init();
   display.setupScenes();
@@ -87,6 +91,7 @@ FLASHMEM void setup()
   polySynth.loadPatch(0);
   seq.setTempo(SEQ_TEMPO, 8);
   seq.play();
+  polySynth.voice1.setupControllers();  
   display.nextScene();
   threads.addThread(synthLoop);
   // Serial.println(polySynth.voice1.toString());
@@ -106,6 +111,7 @@ FLASHMEM void loop()
   audioOutPollTimer.update();
   digitalIO.update();
   controls.update();
+  lights.update();
   serialLogTimer.update();
 
   if (controls.buttons[0].didLongPress())
@@ -127,11 +133,6 @@ void onSerialLogTimer()
 
   printf(", cpu %2.2f, max %2.2f, temp %2.1f°C", cpu, maxCpu, tempmonGetTemp());
 
-  // for (int i = 0; i < NUMPOTS; i++)
-  // {
-  //   Potentiometer *p = &controls.pots[i];
-  //   printf(", pot[%2d] %3d", p->getPin(), p->getValue());
-  // }
   for (uint8_t i = 0; i < sizeof(buttonPinsActive); i++)
   {
     Button *b = &controls.buttons[i];
@@ -140,11 +141,6 @@ void onSerialLogTimer()
 
   Serial.print("\n");
 }
-
-// void onDisplayUpdateTouch()
-// {
-//   display.updateTouch();
-// }
 
 void playStep(SeqStep *steps[SEQ_TRACKS])
 {

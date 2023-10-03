@@ -9,9 +9,10 @@
 #define MXP_S2 30
 #define MXP_S3 31
 #define SAMPLEAVG 32
+#define BITRESOLUTION 10
 
-const uint8_t muxBus[] = {MUXA_COM, MUXB_COM};
-const uint8_t potPin[] = {0, 16, 17, 18, 19};
+const uint8_t PROGMEM muxBus[] = {MUXA_COM, MUXB_COM};
+const uint8_t PROGMEM potPin[] = {0, 16, 17, 18, 19};
 uint16_t last[] = {0, 0, 0, 0, 0};
 
 class AnalogMux
@@ -25,7 +26,7 @@ public:
         pinMode(MXP_S3, OUTPUT);
         pinMode(MUXA_COM, INPUT);
         pinMode(MUXB_COM, INPUT);
-        analogReadResolution(10);
+        analogReadResolution(BITRESOLUTION);
         analogReadAveraging(SAMPLEAVG);
     }
 
@@ -46,7 +47,7 @@ private:
     }
 
     uint16_t muxRead(uint8_t busID, uint8_t ioChannel)
-    {
+    {                
         SetChannel(ioChannel);
         return analogRead(muxBus[busID]);
     }

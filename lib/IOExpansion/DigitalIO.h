@@ -35,22 +35,20 @@ public:
 
     bool addBus(uint8_t addr, uint16_t buttonMask = word(B00000000, B11110000))
     {
-        if (busCount < 8)
+        if (busCount() < 8)
         {
-            PCF8575 *b = new PCF8575(addr, &Wire);
-            if (b->begin(B00000000))
+            PCF8575 *b = new PCF8575(addr);
+            if (b->begin(B11111111))
             {
                 b->write16(buttonMask);
                 b->setButtonMask(buttonMask);
             }
             else
             {
-                Serial.printf("Error: Unable to initialise PCF board %d at address (%x)\n", busCount + 1, addr);
+                Serial.printf("Error: Unable to initialise PCF board %d at address (%x)\n", busCount() + 1, addr);
                 delete[] b;
                 return false;
-            }
-            busCount++;
-            pinCount = busCount * 16;
+            }            
             bus.push_back(b);
             return true;
         }
@@ -59,9 +57,12 @@ public:
 
     uint8_t digitalReadIO(uint8_t gpioId)
     {
-        uint8_t bus = 0, channel = 0;
-        if (getDigitalBusChannel(gpioId, bus, channel))
-            return this->bus[bus]->read(channel);
+        if (this->bus.size() > 0)
+        {
+            uint8_t bus = 0, channel = 0;
+            if (getDigitalBusChannel(gpioId, bus, channel))
+                return this->bus[bus]->read(channel);
+        }
         return 0;
     }
 
@@ -70,9 +71,12 @@ public:
         uint8_t bus = 0, channel = 0;
         if (getDigitalBusChannel(id, bus, channel))
         {
-            noInterrupts();
-            this->bus[bus]->write(channel, (on) ? LOW : HIGH);
-            interrupts();
+            if (bus < busCount())
+            {
+                noInterrupts();
+                this->bus[bus]->write(channel, (on) ? LOW : HIGH);
+                interrupts();
+            }
         }
     }
 
@@ -81,13 +85,16 @@ public:
         uint8_t bus = 0, channel = 0;
         if (getDigitalBusChannel(gpioId, bus, channel))
         {
-            //Serial.printf("UPDATING BUTTON FROM PINSTATE : bus=%d, channel=%d\n", bus, channel);
-            //Serial.printf("busdata[%d] = %d\n", bus, busData[bus]);
-            bool bitval = bitRead(busData[bus], channel);
-            //Serial.printf("BITVAL = %d\n", bitval);
+            bool bitval = false;
+            if (bus < busCount())
+            {
+                // Serial.printf("UPDATING BUTTON FROM PINSTATE : bus=%d, channel=%d\n", bus, channel);
+                // Serial.printf("busdata[%d] = %d\n", bus, busData[bus]);
+                bitval = bitRead(busData[bus], channel);
+                // Serial.printf("BITVAL = %d\n", bitval);
+            }
             return bitval;
         }
-
         return false;
     }
 
@@ -100,9 +107,8 @@ public:
         // loop through possible addresses
         for (int i = 1; i < 120; i++)
         {
-            
-            Wire.setSCL(A5);
-            Wire.setSDA(A4);
+            //Wire.setSCL(A5);
+            //Wire.setSDA(A4);
             Wire.beginTransmission(i);
             // returns 0 if device found
             if (Wire.endTransmission() == 0)
@@ -122,11 +128,10 @@ public:
         Serial.printf("Found %d device(s).\n", count);
     }
 
-    uint8_t getBusCount() { return busCount; }
-    uint8_t getPinCount() { return pinCount; }
+    uint8_t busCount() { return this->bus.size(); }
+    uint8_t pinCount() { return busCount() * 16; }
 
 private:
-    uint8_t busCount = 0, pinCount = 0;
     DigitalBusVector bus;
     uint16_t busData[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     SimpleTimer debounceTimer;
@@ -135,7 +140,7 @@ private:
     {
         bus = gpioId / 16;
         channel = gpioId % 16;
-        return (bus < busCount);
+        return (bus < busCount());
     }
 
     void onDidGPIOChange()
@@ -143,10 +148,10 @@ private:
         digitalIOChanged = false;
         if (debounceTimer.update())
         {
-            for (uint8_t i = 0; i < busCount; i++)
+            for (uint8_t i = 0; i < busCount(); i++)
                 busData[i] = bus[i]->read16();
 
-            //Serial.printf("GPIO changed : [0] %s - [1] %s\n", binary16(busData[0]).c_str(), binary16(busData[1]).c_str());
+            // Serial.printf("GPIO changed : [0] %s - [1] %s\n", binary16(busData[0]).c_str(), binary16(busData[1]).c_str());
         }
     }
 
@@ -163,7 +168,6 @@ private:
         return result;
     }
 } digitalIO;
-
 
 // ..............
 //

@@ -20,18 +20,26 @@ public:
         // parameters
         ParameterTarget target_amplitude = [](AudioStream *a, float v)
         { ((AudioSynthWaveformDc *)a)->amplitude(v); };
-        
+
         aenv_lvl = addParameter(F("A-Env Level"), 1, 0, 1, &voiceAENVdc, target_amplitude, asPERCENTAGE);
         penv_lvl = addParameter(F("P-Env Level"), 1, 0, 1, &voicePENVdc, target_amplitude, asPERCENTAGE);
         fenv_lvl = addParameter(F("F-Env Level"), 1, 0, 1, &voiceFENVdc, target_amplitude, asPERCENTAGE);
         xmod1 = addParameter(F("X-Mod 1->2"), 1, 0, 1, &osc1XMODamt, target_amplitude, asPERCENTAGE);
         xmod2 = addParameter(F("X-Mod 2->1"), 1, 0, 1, &osc2XMODamt, target_amplitude, asPERCENTAGE);
-        ringmod = addParameter(F("Ring Mod Level"), 1, 0, 1, &voiceRINGamt, [](AudioStream *a, float v)
-                               { voiceRINGamt.amplitude(v); osc1waveMixer.gain(1, 1.0 - v); }, asPERCENTAGE);
+        ringmod = addParameter(
+            F("Ring Mod Level"), 1, 0, 1, &voiceRINGamt, [](AudioStream *a, float v)
+            { voiceRINGamt.amplitude(v); osc1waveMixer.gain(1, 1.0 - v); },
+            asPERCENTAGE);
         ringmodFreq = addParameter(F("Ring Mod Freq"), 500, 0, 3000, &voiceRingModwave, [](AudioStream *a, float v)
                                    { voiceRingModwave.frequency(v); });
         shaperShape = addParameter(F("Shaper wave"), 1, 0, 29, &waveshape1, [](AudioStream *a, float v)
-                                   { waveshape1.shape(WST[(uint8_t)v], 257); waveshape2.shape(WST[(uint8_t)v], 257); });
+                                   { waveshape1.shape(WST[(uint8_t)v], 257); waveshape2.shape(WST[(uint8_t)v], 257); });        
+    }
+
+    void setupControllers() // TODO rig controllers to parameters
+    {
+        //aenv_lvl->attachController(&controls.pots[0]);
+        //ringmod->attachController(&controls.pots[1]);
     }
 };
 
