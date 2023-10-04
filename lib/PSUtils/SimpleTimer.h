@@ -2,8 +2,6 @@
 #define SIMPLETIMER_H
 #include <Arduino.h>
 
-
-
 class SimpleCallbackTimer
 {
 public:

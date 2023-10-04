@@ -31,7 +31,7 @@
 #define POT_Data3 20
 #define POT_Data4 21
 
-const uint8_t PROGMEM potPinsActive[] = {POT_Data1, POT_Data2, POT_Data3, POT_Data4, POT_V1_Cutoff};
+const uint8_t PROGMEM potPinsActive[] = {56, 57, 58, 59, 60};
 
 #pragma endregion
 
