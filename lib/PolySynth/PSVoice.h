@@ -38,8 +38,10 @@ public:
 
     void setupControllers() // TODO rig controllers to parameters
     {
-        //aenv_lvl->attachController(&controls.pots[0]);
-        //ringmod->attachController(&controls.pots[1]);
+        aenv_lvl->attachController(&controls.pots[0]);
+        aenv_lvl->activate();
+        ringmod->attachController(&controls.pots[1]);
+        ringmod->activate();
     }
 };
 

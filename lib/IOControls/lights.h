@@ -5,7 +5,7 @@
 #include <DigitalIO.h>
 #include <SimpleTimer.h>
 
-const uint8_t PROGMEM ledPins[] = {4, 5, 6, 7, 20, 21, 22, 23};
+const uint8_t PROGMEM ledPins[] = {16};
 
 class Lights
 {

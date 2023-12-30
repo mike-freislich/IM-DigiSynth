@@ -32,8 +32,9 @@ public:
     ~DSDisplay() {}
 
     void begin()
-    {
-        tft.begin(90000000u, 6000000);     
+    {        
+        tft.begin(90000000u, 1000000);     
+        //tft.begin
         tft.setRotation(3);
         tft.fillScreen(ILI9341_BLACK);        
         this->setBounds(2,0,318,240);
@@ -100,7 +101,7 @@ public:
     DSScene *getCurrentScene() { return scenes[sceneIndex]; }
 
 private:    
-    ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC);
+    ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC, -1);
     PolySynth *synth;
     void (*onDisplayUpdateTouch)();
     Controls *_controls = nullptr;

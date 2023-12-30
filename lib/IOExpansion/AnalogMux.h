@@ -6,16 +6,16 @@
 #define MUXB_COM A1
 #define MUXC_COM A2
 #define MUXD_COM A3
-#define MXP_S0 28
-#define MXP_S1 29
-#define MXP_S2 30
-#define MXP_S3 31
+#define MXP_S0 31
+#define MXP_S1 30
+#define MXP_S2 29
+#define MXP_S3 28
 #define SAMPLEAVG 32
 #define BITRESOLUTION 10
 
 const uint8_t PROGMEM muxBus[] = {MUXA_COM, MUXB_COM, MUXC_COM, MUXD_COM};
-const uint8_t PROGMEM potPin[] = {0, 16, 17, 18, 19};
-uint16_t last[] = {0, 0, 0, 0, 0};
+const uint8_t PROGMEM potPin[] = {0, 1, 2, 3};
+uint16_t last[] = {0, 0, 0, 0};
 
 class AnalogMux
 {

@@ -10,11 +10,11 @@
 #include <SimpleTimer.h>
 #include "DSSequencer.h"
 #include "TeensyThreads.h"
+#include <PSMidi.h>
 #include "PolySynth.h"
 #include "FastTrig.h"
 #include "mem.h"
 #include "controls.h"
-#include "MIDIUSB.h"
 #include "tests.h"
 #include "lights.h"
 
@@ -43,6 +43,7 @@ void delayForSerial()
   while (!Serial && ((millis() - lastTime) < ARDUINO_SERIAL_DELAY))
     delay(1);
 }
+
 #endif
 
 void synthLoop()
@@ -50,6 +51,25 @@ void synthLoop()
   while (1)
   {
     seq.update();
+  }
+}
+
+void midiLoop()
+{
+  while (1)
+  {
+    usbMIDI.read();
+
+    // while (usbMIDI.read(1))
+    // {
+    //   switch (usbMIDI.getType())
+    //   {
+    //   case usbMIDI.Clock: // midi.clock
+    //     break;
+    //   default:
+    //     break;
+    //   }
+    // }
   }
 }
 
@@ -67,8 +87,6 @@ FLASHMEM void setup()
 #endif
 
   Serial.println("initialising Digital IO");
-  
-  
 
   bool success = (digitalIO.addBus(PCF_ADDR0, word(B00000000, B11110000)) &&
                   digitalIO.addBus(PCF_ADDR1, word(B00000000, B11110000)));
@@ -76,14 +94,13 @@ FLASHMEM void setup()
   if (!success)
   {
     Serial.println(F("Error: Digital IO Bus Expansion failed to inititalise "));
-    printf("Usable busses %d and pins %d\n", digitalIO.busCount(), digitalIO.pinCount());    
+    printf("Usable busses %d and pins %d\n", digitalIO.busCount(), digitalIO.pinCount());
   }
   digitalIO.begin();
   digitalIO.setDebounceTime(10);
   digitalIO.findAddress();
 
   controls.setup();
-  
 
   polySynth.init();
   display.setupScenes();
@@ -91,9 +108,14 @@ FLASHMEM void setup()
   polySynth.loadPatch(0);
   seq.setTempo(SEQ_TEMPO, 8);
   seq.play();
-  polySynth.voice1.setupControllers();  
+  polySynth.voice1.setupControllers();
   display.nextScene();
   threads.addThread(synthLoop);
+
+  usbMIDI.setHandleClock(myClock);
+  usbMIDI.setHandleNoteOn(myNoteOn);
+  usbMIDI.setHandleNoteOff(myNoteOff);
+  //threads.addThread(midiLoop);
   // Serial.println(polySynth.voice1.toString());
 }
 
@@ -113,12 +135,12 @@ FLASHMEM void loop()
   controls.update();
   lights.update();
   serialLogTimer.update();
+  usbMIDI.read();
 
   if (controls.buttons[0].didLongPress())
   {
     //   polySynth.savePatch(0);
   }
-  
 
   delay(1);
 }
@@ -150,3 +172,9 @@ void playStep(SeqStep *steps[SEQ_TRACKS])
       polySynth.playNote(steps[i]->midiNote, steps[i]->velocity);
   }
 }
+
+void handlePlayNote(byte note, byte velocity)
+{
+  polySynth.playNote(note, velocity);
+}
+

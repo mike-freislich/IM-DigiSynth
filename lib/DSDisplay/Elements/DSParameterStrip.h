@@ -19,7 +19,7 @@ public:
         parameters.push_back(parameter);
         if (controller != nullptr)
         {
-            int i = parameters.size() % NUMPOTS;
+            int i = parameters.size() % controls.pots.size();
             parameter->attachController(&controls.pots[i]);
         }
         else
