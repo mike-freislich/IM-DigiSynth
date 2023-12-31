@@ -7,7 +7,6 @@
 #include <SPI.h>
 #include <SerialFlash.h>
 #include <patching.h>
-#include "PSMidi.h"
 #include "PSPatchManager.h"
 #include "PSLFO.h"
 #include "waveshaperTables.h"

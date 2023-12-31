@@ -9,8 +9,8 @@
 #include <SimpleTimer.h>
 #include "DSSequencer.h"
 #include "TeensyThreads.h"
-#include <PSMidi.h>
 #include "PolySynth.h"
+#include <PSMidi.h>
 #include "FastTrig.h"
 #include "mem.h"
 #include "controls.h"
@@ -26,6 +26,7 @@ void monitorPeakOutput();
 void playStep(SeqStep *_steps[SEQ_TRACKS]);
 
 PolySynth polySynth = PolySynth();
+//PSMidi psMidi = PSMidi(&polySynth);
 Sequencer seq = Sequencer(playStep);
 DSDisplay display = DSDisplay(&polySynth, &controls);
 
@@ -57,7 +58,8 @@ void midiLoop()
 {
   while (1)
   {
-    usbMIDI.read();
+    psMidi.update();
+    //usbMIDI.read();
 
     // while (usbMIDI.read(1))
     // {
@@ -106,14 +108,11 @@ FLASHMEM void setup()
 
   polySynth.loadPatch(0);
   seq.setTempo(SEQ_TEMPO, 8);
-  seq.play();
+  //seq.play();
   polySynth.voice1.setupControllers();
   display.nextScene();
   threads.addThread(synthLoop);
-
-  usbMIDI.setHandleClock(myClock);
-  usbMIDI.setHandleNoteOn(myNoteOn);
-  usbMIDI.setHandleNoteOff(myNoteOff);
+  psMidi.begin(&polySynth);   
   //threads.addThread(midiLoop);
   // Serial.println(polySynth.voice1.toString());
 }
@@ -134,7 +133,7 @@ FLASHMEM void loop()
   controls.update();
   lights.update();
   serialLogTimer.update();
-  usbMIDI.read();
+  psMidi.update();
 
   if (controls.buttons[0].didLongPress())
   {
