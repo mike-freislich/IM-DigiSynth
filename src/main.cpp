@@ -5,7 +5,6 @@
 #include <SD.h>
 #include <SPI.h>
 #include <SerialFlash.h>
-
 #include <DSDisplay.h>
 #include <SimpleTimer.h>
 #include "DSSequencer.h"
