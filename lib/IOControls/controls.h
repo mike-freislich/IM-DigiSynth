@@ -21,8 +21,8 @@ public:
     ButtonVector buttons;
 
     Encoder encoders[NUMENCODERS] = {
-        Encoder(PIN_ENC1_A, PIN_ENC1_B, encoder1ISRA, encoder1ISRB),
-        Encoder(PIN_ENC2_A, PIN_ENC2_B, encoder2ISRA, encoder2ISRB)};
+        Encoder(PIN_ENC1_A, PIN_ENC1_B, encoder1ISRA, encoder1ISRB)};
+        //Encoder(PIN_ENC2_A, PIN_ENC2_B, encoder2ISRA, encoder2ISRB)};
 
     Controls()
     {
@@ -32,6 +32,12 @@ public:
     {
         for (uint8_t i = 0; i < sizeof(potPinsActive); i++)
             pots.push_back(Potentiometer(potPinsActive[i], IO_EXPANSION));
+
+        
+        pots[7].setInverted(true);
+        pots[8].setInverted(true);
+        pots[9].setInverted(true);
+        pots[10].setInverted(true);
 
         for (uint8_t x = 0; x < sizeof(buttonPinsActive); x++)
             buttons.push_back(Button(buttonPinsActive[x], IO_EXPANSION));        
@@ -65,7 +71,7 @@ protected:
 
 void encoder1ISRA() { controls.encoders[0].isrA(); }
 void encoder1ISRB() { controls.encoders[0].isrB(); }
-void encoder2ISRA() { controls.encoders[1].isrA(); }
-void encoder2ISRB() { controls.encoders[1].isrB(); }
+// void encoder2ISRA() { controls.encoders[1].isrA(); }
+// void encoder2ISRB() { controls.encoders[1].isrB(); }
 
 #endif

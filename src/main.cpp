@@ -58,19 +58,7 @@ void midiLoop()
 {
   while (1)
   {
-    psMidi.update();
-    //usbMIDI.read();
-
-    // while (usbMIDI.read(1))
-    // {
-    //   switch (usbMIDI.getType())
-    //   {
-    //   case usbMIDI.Clock: // midi.clock
-    //     break;
-    //   default:
-    //     break;
-    //   }
-    // }
+    MYMIDI::psMidi.update();
   }
 }
 
@@ -112,7 +100,8 @@ FLASHMEM void setup()
   polySynth.voice1.setupControllers();
   display.nextScene();
   threads.addThread(synthLoop);
-  psMidi.begin(&polySynth);   
+  
+  MYMIDI::psMidi.begin(&polySynth);   
   //threads.addThread(midiLoop);
   // Serial.println(polySynth.voice1.toString());
 }
@@ -133,11 +122,11 @@ FLASHMEM void loop()
   controls.update();
   lights.update();
   serialLogTimer.update();
-  psMidi.update();
+  MYMIDI::psMidi.update();
 
   if (controls.buttons[0].didLongPress())
   {
-    //   polySynth.savePatch(0);
+    polySynth.savePatch(0);
   }
 
   delay(1);

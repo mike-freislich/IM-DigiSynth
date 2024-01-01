@@ -5,7 +5,7 @@
 #include <AnalogMux.h>
 
 //#define NUMPOTS 4
-#define POT_RESOLUTION 2
+#define POT_RESOLUTION 4
 #define POT_RANGE_MIN 10
 #define POT_RANGE_MAX 1014
 
@@ -34,10 +34,15 @@ public:
         if (value >= _value + POT_RESOLUTION || value <= _value - POT_RESOLUTION)
         {
             _value = value;
-            Serial.printf("POT %02d - value changed to %04d log(%04d)\n", _pin, _value, (int)getLogValue());
+
+            Serial.printf("POT %02d (Inverted : %d)- value changed to %04d log(%04d)\n", _pin, invert, (invert) ? _analogMax - _value : _value, (int)getLogValue());
             return true;
         }
         return false;
+    }
+
+    void setInverted(bool state) {
+        this->invert = state;
     }
 
     float getValue() override
@@ -45,13 +50,13 @@ public:
         if (taper == audio)
             return getLogValue();
 
-        return _value;
+        return (this->invert) ? this->_analogMax - _value : _value;
     }
 
     float getLogValue()
     {
-        float result = (_value * (_value + 1)) >> ANALOG_READ_BITS;
-        return result;
+        float result = (_value * (_value + 1)) >> ANALOG_READ_BITS;        
+        return (this->invert) ? this->_analogMax - result : result;
     }
 
     void update() override
@@ -61,6 +66,7 @@ public:
     }
 
 protected:
+    bool invert = false;
 };
 
 #endif

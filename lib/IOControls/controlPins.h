@@ -60,10 +60,10 @@ const uint8_t PROGMEM buttonPinsActive[] = {BTN_Shift, PIN_ROTARY1_BUTTON}; //, 
 #pragma endregion
 
 // ENCODERS
-#define NUMENCODERS 2
+#define NUMENCODERS 1
 #define PIN_ENC1_A A7
 #define PIN_ENC1_B A6
-#define PIN_ENC2_A A8
-#define PIN_ENC2_B A9
+//#define PIN_ENC2_A A8
+//#define PIN_ENC2_B A9
 
 #endif

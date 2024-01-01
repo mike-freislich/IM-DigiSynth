@@ -93,7 +93,7 @@ protected:
 
 static void encoder1ISRA();
 static void encoder1ISRB();
-static void encoder2ISRA();
-static void encoder2ISRB();
+// static void encoder2ISRA();
+// static void encoder2ISRB();
 
 #endif

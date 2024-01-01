@@ -30,7 +30,7 @@ public:
             F("Ring Mod Level"), 1, 0, 1, &voiceRINGamt, [](AudioStream *a, float v)
             { voiceRINGamt.amplitude(v); osc1waveMixer.gain(1, 1.0 - v); },
             asPERCENTAGE);
-        ringmodFreq = addParameter(F("Ring Mod Freq"), 500, 0, 3000, &voiceRingModwave, [](AudioStream *a, float v)
+        ringmodFreq = addParameter(F("Ring Mod Freq"), 500, 0, 5000, &voiceRingModwave, [](AudioStream *a, float v)
                                    { voiceRingModwave.frequency(v); });
         shaperShape = addParameter(F("Shaper wave"), 1, 0, 29, &waveshape1, [](AudioStream *a, float v)
                                    { waveshape1.shape(WST[(uint8_t)v], 257); waveshape2.shape(WST[(uint8_t)v], 257); });        
