@@ -71,9 +71,7 @@ FLASHMEM void setup()
 #ifdef USB_MIDI_AUDIO_SERIAL
   delayForSerial();
 #endif
-#ifdef RUNTESTS
-  runTests();
-#endif
+
 
   Serial.println("initialising Digital IO");
 
@@ -104,6 +102,10 @@ FLASHMEM void setup()
   MYMIDI::psMidi.begin(&polySynth);   
   //threads.addThread(midiLoop);
   // Serial.println(polySynth.voice1.toString());
+
+  #ifdef RUNTESTS
+    runTests();
+  #endif
 }
 
 void refreshDisplay() { display.render(); }
@@ -159,9 +161,3 @@ void playStep(SeqStep *steps[SEQ_TRACKS])
       polySynth.playNote(steps[i]->midiNote, steps[i]->velocity);
   }
 }
-
-void handlePlayNote(byte note, byte velocity)
-{
-  polySynth.playNote(note, velocity);
-}
-

@@ -44,7 +44,7 @@ const uint8_t PROGMEM potPinsActive[] = {0,1,2,3, 32,33,34, 36,37,38,39};
 #define BTN_V1_EnvSelect 3
 #define BTN_Shift 1
 #define PIN_ROTARY1_BUTTON 0
-#define PIN_ROTARY2_BUTTON 4
+//#define PIN_ROTARY2_BUTTON 4
 
 const uint8_t PROGMEM buttonPinsActive[] = {BTN_Shift, PIN_ROTARY1_BUTTON}; //, BTN_V1_EnvSelect, BTN_V1_NoiseType};
 //const uint16_t BUTTONMASK = word(B00000000, B00000011);

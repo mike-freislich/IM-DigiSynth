@@ -8,21 +8,22 @@
 #include <Arduino.h>
 #include <SD.h>
 #include <PSComponent.h>
+#include <InputButton.h>
 
 void testComponents();
 void testSDCard();
 bool testAudioStream();
 bool testAudioComponent();
+void testIO();
 
 FLASHMEM void runTests()
 {
     Serial.println("*************** RUNNING TESTS *************** ");
     // testComponents();
     // testSDCard();
-
     // testAudioStream();
-
-    testAudioComponent();
+    // testAudioComponent();
+    testIO();
 }
 
 class ACEnvelope : public PSComponent
@@ -32,10 +33,10 @@ public:
 };
 
 FLASHMEM bool testAudioComponent()
-{    
+{
     ACEnvelope ace;
     PSParameter *attack = ace.addParameter("Attack", 50, 0, 1000, &filter1env, [](AudioStream *audioStream, float value)
-                     { ((AudioEffectEnvelope *)audioStream)->attack(value); });
+                                           { ((AudioEffectEnvelope *)audioStream)->attack(value); });
 
     attack->setValue(112);
     attack->callTarget();
@@ -165,6 +166,27 @@ FLASHMEM void testComponents()
 
     String data = "*Synth{p1:0.10,p2:0.20*LFO{freq:1000.00,shape:2.00}*ENV_A{atk:30.00,dcy:130.00,sus:65.00,rel:32.00}*ENV_F{atk:32.00,dcy:132.00,sus:67.00,rel:32.00}}";
     c.fromString(data);
+}
+
+FLASHMEM void testIO()
+{
+    Serial.println("*************** testing IO ***************");
+
+    Button *btnShift = &(controls.buttons[0]);
+    Button *btnRotary = &(controls.buttons[1]);
+    
+    while (1)
+    {
+        controls.update();
+        btnShift->setValue(1);
+        //for (int i = 0; i < 32; i ++) {  
+        //}
+        printf("GPIO changed : [0] %s - [1] %s\n", digitalIO.binary16(digitalIO.getBusData(0)).c_str(), digitalIO.binary16(digitalIO.getBusData(1)).c_str());
+        //printf("BUS DATA : %d\n", digitalIO.getBusData(2));
+        //printf("[BTN SHIFT] = %d, [BTN ROTARY] = %d\n", btnShift->getValue(), btnRotary->getValue());
+
+        delay(100);
+    }
 }
 
 #endif

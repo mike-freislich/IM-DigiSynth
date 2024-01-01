@@ -128,13 +128,31 @@ public:
         Serial.printf("Found %d device(s).\n", count);
     }
 
+    uint16_t getBusData(uint8_t busIndex) {
+        return busData[busIndex % 8];
+    }
+
     uint8_t busCount() { return this->bus.size(); }
     uint8_t pinCount() { return busCount() * 16; }
+
+    String binary16(uint16_t iIn)
+    {
+        String result = "";
+        for (uint16_t mask = 0b1000000000000000; mask; mask >>= 1)
+        {
+            if (mask & iIn)
+                result += '1';
+            else
+                result += '0';
+        }
+        return result;
+    }
+
 
 private:
     DigitalBusVector bus;
     uint16_t busData[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-    SimpleTimer debounceTimer;
+    SimpleTimer debounceTimer;    
 
     bool getDigitalBusChannel(uint8_t gpioId, uint8_t &bus, uint8_t &channel)
     {
@@ -151,22 +169,11 @@ private:
             for (uint8_t i = 0; i < busCount(); i++)
                 busData[i] = bus[i]->read16();
 
-            // Serial.printf("GPIO changed : [0] %s - [1] %s\n", binary16(busData[0]).c_str(), binary16(busData[1]).c_str());
+            Serial.printf("GPIO changed : [0] %s - [1] %s\n", binary16(busData[0]).c_str(), binary16(busData[1]).c_str());
         }
     }
 
-    String binary16(uint16_t iIn)
-    {
-        String result = "";
-        for (uint16_t mask = 0b1000000000000000; mask; mask >>= 1)
-        {
-            if (mask & iIn)
-                result += '1';
-            else
-                result += '0';
-        }
-        return result;
-    }
+    
 } digitalIO;
 
 // ..............
