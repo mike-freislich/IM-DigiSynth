@@ -10,6 +10,7 @@ public:
     {
         controllerType = ControllerType::CT_BTN;
         _value = 1;
+        pressedTime = millis();
     }
     Button(int pin, IOType ioType = IO_EXPANSION, uint16_t debounceMillis = 30) : InputBase(pin, ioType, debounceMillis)
     {

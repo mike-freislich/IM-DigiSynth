@@ -155,8 +155,9 @@ public:
     void playNote(uint8_t midiNote, uint8_t velocity)
     {
         AudioNoInterrupts();
+        _currentNote = midiNote;
         waveformLeft.begin(AMPLITUDE * velocity2amplitude[velocity], noteFreqs[midiNote] - _detune, (uint16_t)voice1.part1->params[0]->getValue());
-        waveformRight.begin(AMPLITUDE * velocity2amplitude[velocity], noteFreqs[midiNote] + _detune, waves[waveIndex]); // detune
+        waveformRight.begin(AMPLITUDE * velocity2amplitude[velocity], noteFreqs[midiNote] + _detune, (uint16_t)voice1.part2->params[0]->getValue()); // waves[waveIndex]); // detune
 
         voice1.part1->vca_env->noteOn();
         voice1.part1->vcf_env->noteOn();
@@ -165,6 +166,18 @@ public:
         voice1.part2->vcf_env->noteOn();
         voice1.part2->mod_env->noteOn();
         AudioInterrupts();
+    }
+
+    void updateVoices(int pitchBend)
+    {
+        static float factor = 1.0/24*3;
+        if (pitchBend != lastPitchBend)
+        {
+            float amount = (float)pitchBend / 8192 * factor;
+            pitchBendDC.amplitude(amount);            
+            //printf("pitch bend : %0.2f", amount);
+            lastPitchBend = pitchBend;
+        }
     }
 
     void nextWaveForm() { waveIndex = (waveIndex + 1) % (sizeof(waves) / sizeof(waves[0])); }
@@ -299,6 +312,8 @@ private:
     uint8_t waveIndex;
     float _detune;
     float _balance;
-};
+    uint8_t _currentNote;
+    int lastPitchBend;
+} polySynth;
 
 #endif

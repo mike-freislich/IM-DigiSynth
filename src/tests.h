@@ -15,6 +15,7 @@ void testSDCard();
 bool testAudioStream();
 bool testAudioComponent();
 void testIO();
+void testLED_loop();
 
 FLASHMEM void runTests()
 {
@@ -168,24 +169,29 @@ FLASHMEM void testComponents()
     c.fromString(data);
 }
 
+SimpleTimer ftimer;
+int lightIndex = 0;
+uint8_t testLights[] = {4, 20, 21, 22, 23};
 FLASHMEM void testIO()
 {
     Serial.println("*************** testing IO ***************");
+    digitalIO.setup();    
+    digitalIO.setDebounceTime(30);
+    digitalIO.begin();
+    ftimer.setDuration(500);
 
-    Button *btnShift = &(controls.buttons[0]);
-    Button *btnRotary = &(controls.buttons[1]);
-    
     while (1)
     {
-        controls.update();
-        btnShift->setValue(1);
-        //for (int i = 0; i < 32; i ++) {  
-        //}
-        printf("GPIO changed : [0] %s - [1] %s\n", digitalIO.binary16(digitalIO.getBusData(0)).c_str(), digitalIO.binary16(digitalIO.getBusData(1)).c_str());
-        //printf("BUS DATA : %d\n", digitalIO.getBusData(2));
-        //printf("[BTN SHIFT] = %d, [BTN ROTARY] = %d\n", btnShift->getValue(), btnRotary->getValue());
+        int currentLight = testLights[lightIndex];
+        digitalIO.digitalWriteIO(currentLight, true);
+        while (!ftimer.update())
+        {
+            delay(10);
+            digitalIO.update();
+        }
+        digitalIO.digitalWriteIO(currentLight, false);
 
-        delay(100);
+        lightIndex = (lightIndex + 1) % (int)sizeof(testLights);
     }
 }
 

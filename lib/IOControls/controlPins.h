@@ -43,19 +43,13 @@ const uint8_t PROGMEM potPinsActive[] = {0,1,2,3, 32,33,34, 36,37,38,39};
 #define BTN_V1_NoiseType 10
 #define BTN_V1_EnvSelect 3
 #define BTN_Shift 1
-#define PIN_ROTARY1_BUTTON 0
-//#define PIN_ROTARY2_BUTTON 4
+#define BTN_ROTARY1 0
 
-const uint8_t PROGMEM buttonPinsActive[] = {BTN_Shift, PIN_ROTARY1_BUTTON}; //, BTN_V1_EnvSelect, BTN_V1_NoiseType};
-//const uint16_t BUTTONMASK = word(B00000000, B00000011);
-// uint16_t GET_BUTTONMASK()
-// {
-//     uint16_t mask = 0;
-//     for (uint8_t i = 0; i < sizeof(buttonPinsActive); i ++)
-//     {        
-//         mask = bitSet(mask, buttonPinsActive[i]);
-//     }
-// }
+const uint8_t PROGMEM buttonPinsActive[] = {BTN_Shift, BTN_ROTARY1, 16, 17, 18, 19}; //, BTN_V1_EnvSelect, BTN_V1_NoiseType};
+
+// LIGHTS
+const uint8_t PROGMEM ledPinsActive[] = {20,21,22,23}; //, BTN_V1_EnvSelect, BTN_V1_NoiseType};
+
 
 #pragma endregion
 

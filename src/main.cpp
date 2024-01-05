@@ -5,12 +5,14 @@
 #include <SD.h>
 #include <SPI.h>
 #include <SerialFlash.h>
+#include "PSMidi.h"
 #include <DSDisplay.h>
 #include <SimpleTimer.h>
 #include "DSSequencer.h"
 #include "TeensyThreads.h"
+
 #include "PolySynth.h"
-#include <PSMidi.h>
+
 #include "FastTrig.h"
 #include "mem.h"
 #include "controls.h"
@@ -25,8 +27,6 @@ void onSerialLogTimer();
 void monitorPeakOutput();
 void playStep(SeqStep *_steps[SEQ_TRACKS]);
 
-PolySynth polySynth = PolySynth();
-//PSMidi psMidi = PSMidi(&polySynth);
 Sequencer seq = Sequencer(playStep);
 DSDisplay display = DSDisplay(&polySynth, &controls);
 
@@ -58,7 +58,7 @@ void midiLoop()
 {
   while (1)
   {
-    MYMIDI::psMidi.update();
+    psMidi.update();
   }
 }
 
@@ -71,21 +71,12 @@ FLASHMEM void setup()
 #ifdef USB_MIDI_AUDIO_SERIAL
   delayForSerial();
 #endif
+#ifdef RUNTESTS
+  runTests();
+#endif
 
-
-  Serial.println("initialising Digital IO");
-
-  bool success = (digitalIO.addBus(PCF_ADDR0, word(B00000000, B11110000)) &&
-                  digitalIO.addBus(PCF_ADDR1, word(B00000000, B11110000)));
-
-  if (!success)
-  {
-    Serial.println(F("Error: Digital IO Bus Expansion failed to inititalise "));
-    printf("Usable busses %d and pins %d\n", digitalIO.busCount(), digitalIO.pinCount());
-  }
+  digitalIO.setup();
   digitalIO.begin();
-  digitalIO.setDebounceTime(10);
-  digitalIO.findAddress();
 
   controls.setup();
 
@@ -94,18 +85,16 @@ FLASHMEM void setup()
 
   polySynth.loadPatch(0);
   seq.setTempo(SEQ_TEMPO, 8);
-  //seq.play();
+  // seq.play();
   polySynth.voice1.setupControllers();
   display.nextScene();
   threads.addThread(synthLoop);
-  
-  MYMIDI::psMidi.begin(&polySynth);   
-  //threads.addThread(midiLoop);
-  // Serial.println(polySynth.voice1.toString());
 
-  #ifdef RUNTESTS
-    runTests();
-  #endif
+  psMidi.begin(&polySynth);
+  // threads.addThread(midiLoop);
+  //  Serial.println(polySynth.voice1.toString());
+
+
 }
 
 void refreshDisplay() { display.render(); }
@@ -124,7 +113,8 @@ FLASHMEM void loop()
   controls.update();
   lights.update();
   serialLogTimer.update();
-  MYMIDI::psMidi.update();
+  psMidi.update();
+  polySynth.updateVoices(psMidi.pitchBend);
 
   if (controls.buttons[0].didLongPress())
   {

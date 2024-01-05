@@ -4,12 +4,13 @@
 #include <SimpleTimer.h>
 #include <PCF8575.h>
 #include <vector>
+#include <controlPins.h>
 
+#define PCF_ISR_PIN 2
 #define PCF_ADDR0 0x20
 #define PCF_ADDR1 0x21
 #define PCF_ADDR2 0x22
 #define PCF_ADDR3 0x23
-#define PCF_ISR_PIN 2
 
 typedef std::vector<PCF8575 *> DigitalBusVector;
 volatile bool digitalIOChanged = false;
@@ -18,8 +19,27 @@ void DigitalIO_ISR() { digitalIOChanged = true; }
 class DigitalIO
 {
 public:
+    DigitalBusVector bus;
     DigitalIO() {}
     ~DigitalIO() {}
+
+    void setup()
+    {
+        Serial.println("initialising Digital IO");
+        Wire.begin();
+        if (!(
+                // this->addBus(PCF_ADDR0) &&
+                // this->addBus(PCF_ADDR1) &&
+                this->addBus(PCF_ADDR2) &&
+                this->addBus(PCF_ADDR3)))
+        {
+            Serial.println(F("Error: Digital IO Bus Expansion failed to inititalise "));
+            printf("Usable busses %d and pins %d\n", this->busCount(), this->pinCount());
+        }
+        this->findAddress();
+        this->setDebounceTime(30);
+        this->setupIOPins();
+    }
 
     void begin()
     {
@@ -33,22 +53,71 @@ public:
             onDidGPIOChange();
     }
 
+    void setupIOPins()
+    {
+
+        for (auto b : bus) {
+            b->write16(0);
+            b->setButtonMask(0);
+        }
+
+        for (auto p : buttonPinsActive)
+            pinMode(p, INPUT);
+
+        for (auto l : ledPinsActive) {
+            pinMode(l, OUTPUT);
+        } 
+
+        // uint16_t mask[this->busCount()];
+        // uint8_t bus, channel;
+        // for (uint8_t b = 0; b < this->busCount(); b++)
+        //     mask[b] = word(B00000000, B11111111);
+        // for (uint8_t p = 0; p < sizeof(buttonPinsActive); p++)
+        // {
+        //     this->getDigitalBusChannel(buttonPinsActive[p], bus, channel);
+        //     printf("clearing bit %d in bus %d\n", channel, bus);
+        //     bitClear(mask[bus], channel);
+        // }
+        // for (uint8_t b = 0; b < this->busCount(); b++) {
+        //     printf("bus0-mask : %s , bus1-mask : %s\n", binary16(mask[0]).c_str(), binary16(mask[1]).c_str());
+        // }
+        // mask[0] = word(B00000000, B00000000);
+        // mask[1] = word(B00000000, B11110000);
+        // for (uint8_t b = 0; b < this->busCount(); b ++)
+        // {
+        //     this->bus[b]->setButtonMask(mask[b]);
+        // }
+    }
+
+    void pinMode(uint8_t gpioPin, uint8_t pinMode)
+    {
+        uint8_t bus, channel;
+        getDigitalBusChannel(gpioPin, bus, channel);
+        PCF8575 *b = this->bus[bus];
+        b->write(channel, pinMode);
+        uint16_t mask = b->getButtonMask();       
+        (pinMode) ? bitSet(mask, channel) : bitClear(mask, channel);
+        b->setButtonMask(mask);    
+        
+        printf("setting output [pin %d] buttonMask [bus %d] = %s\n", channel, bus, binary16(b->getButtonMask()).c_str());
+    }
+
     bool addBus(uint8_t addr, uint16_t buttonMask = word(B00000000, B11110000))
     {
         if (busCount() < 8)
         {
             PCF8575 *b = new PCF8575(addr);
-            if (b->begin(B11111111))
+            if (b->begin())
             {
-                b->write16(buttonMask);
-                b->setButtonMask(buttonMask);
+                //b->write16(buttonMask);
+                //b->setButtonMask(buttonMask);
             }
             else
             {
                 Serial.printf("Error: Unable to initialise PCF board %d at address (%x)\n", busCount() + 1, addr);
                 delete[] b;
                 return false;
-            }            
+            }
             bus.push_back(b);
             return true;
         }
@@ -66,10 +135,10 @@ public:
         return 0;
     }
 
-    void digitalWriteIO(uint8_t id, bool on)
+    void digitalWriteIO(uint8_t gpioId, bool on)
     {
         uint8_t bus = 0, channel = 0;
-        if (getDigitalBusChannel(id, bus, channel))
+        if (getDigitalBusChannel(gpioId, bus, channel))
         {
             if (bus < busCount())
             {
@@ -106,9 +175,7 @@ public:
         Serial.println("searching for IO bus addresses");
         // loop through possible addresses
         for (int i = 1; i < 120; i++)
-        {
-            //Wire.setSCL(A5);
-            //Wire.setSDA(A4);
+        {            
             Wire.beginTransmission(i);
             // returns 0 if device found
             if (Wire.endTransmission() == 0)
@@ -128,7 +195,8 @@ public:
         Serial.printf("Found %d device(s).\n", count);
     }
 
-    uint16_t getBusData(uint8_t busIndex) {
+    uint16_t getBusData(uint8_t busIndex)
+    {
         return busData[busIndex % 8];
     }
 
@@ -148,11 +216,9 @@ public:
         return result;
     }
 
-
 private:
-    DigitalBusVector bus;
     uint16_t busData[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-    SimpleTimer debounceTimer;    
+    SimpleTimer debounceTimer;
 
     bool getDigitalBusChannel(uint8_t gpioId, uint8_t &bus, uint8_t &channel)
     {
@@ -173,7 +239,6 @@ private:
         }
     }
 
-    
 } digitalIO;
 
 // ..............

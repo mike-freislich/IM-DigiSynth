@@ -179,17 +179,17 @@ public:
 
             if (target != nullptr && audioStream != nullptr)
             {
-                if (potTaper == audio)
-                    Serial.println("Audio Taper");
-                Serial.printf("Setting Target AudioComp for '%s' to %2.2f\n", name.c_str(), getValue());
+                // if (potTaper == audio)
+                //     Serial.println("Audio Taper");
+                // Serial.printf("Setting Target AudioComp for '%s' to %2.2f\n", name.c_str(), getValue());
                 target(audioStream, getValue());
                 _didChange = false;
             }
             else if (targetC != nullptr && component != nullptr)
             {
-                if (potTaper == audio)
-                    Serial.println("Audio Taper");
-                Serial.printf("Setting Target PSComp for '%s' to %2.2f\n", name.c_str(), getValue());
+                // if (potTaper == audio)
+                //     Serial.println("Audio Taper");
+                // Serial.printf("Setting Target PSComp for '%s' to %2.2f\n", name.c_str(), getValue());
                 targetC(component, getValue());
                 _didChange = false;
             }

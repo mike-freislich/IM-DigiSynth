@@ -45,7 +45,8 @@ public:
             {
                 String data = patchFile.readString();
                 patchFile.close();
-                printf("Loaded patch data: '%s'\n", data.c_str());
+                Serial.println("Patch Loaded");
+                //printf("Loaded patch data: '%s'\n", data.c_str());
                 return data;
             } else {
                 msg = "Unable to open file";
