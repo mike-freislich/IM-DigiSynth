@@ -1,0 +1,112 @@
+{
+    "config name": "PS Synth v1.0",
+    "date": "04.01.29",
+    
+    "CONTROLLERS": [        
+        {"key":"CTRL_POT1", "type":"CPotentiometer", "name":"pot 1", "pin":10, "debounce":5, "min":10.000000, "max":1010.000000, "PARMS": [{"mode":"normal", "assigned": [{"pkey":"PARM_VOICE_PAN0"},{"pkey":"PARM_PLFO_FREQ"},{"pkey":"PARM_PLFO_AMOUNT"}]}, {"mode":"shift", "assigned": [{"pkey":"PARM_VOICE_PAN0"}, {"pkey":"PARM_FENV_HOLD"},{"pkey":"PARM_FENV_SUSTAIN"},{"pkey":"PARM_AENV_SUSTAIN"}]}]},
+        {"key":"CTRL_POT2", "type":"CPotentiometer", "name":"pot 2", "pin":4, "debounce":5, "min":10.000000, "max":1010.000000, "PARMS": [{"mode":"normal", "assigned": [{"pkey":"PARM_VOICE_PAN1"},{"pkey":"PARM_FENV_AMOUNT"},{"pkey":"PARM_AENV_DECAY"},{"pkey":"PARM_PENV_DECAY"},{"pkey":"PARM_PENV_SUSTAIN"}]}, {"mode":"shift", "assigned": [{"pkey":"PARM_VOICE_PAN1"}]}]}, 
+        {"key":"CTRL_POT3", "type":"CPotentiometer", "name":"pot 3", "pin":2, "debounce":5, "min":10.000000, "max":1010.000000, "PARMS": [{"mode":"normal", "assigned": [{"pkey":"PARM_VOICE_PAN2"},{"pkey":"PARM_AENV_AMOUNT"},{"pkey":"PARM_PLFO_FREQ"},{"pkey":"PARM_PLFO_AMOUNT"}]}, {"mode":"shift", "assigned": [{"pkey":"PARM_AENV_ATTACK"},{"pkey":"PARM_AENV_AMOUNT"},{"pkey":"PARM_PENV_RELEASE"},{"pkey":"PARM_PENV_HOLD"}]}]}, 
+        {"key":"CTRL_POT4", "type":"CPotentiometer", "name":"pot 4", "pin":71, "debounce":5, "min":10.000000, "max":1010.000000, "PARMS": [{"mode":"normal", "assigned": [{"pkey":"PARM_VOICE_PAN3"},{"pkey":"PARM_AENV_RELEASE"},{"pkey":"PARM_PENV_AMOUNT"},{"pkey":"PARM_PENV_ATTACK"}]}, {"mode":"shift", "assigned": [{"pkey":"PARM_VOICE_PAN3"}, {"pkey":"PARM_AENV_RELEASE"}]}]},         
+        {"key":"CTRL_POT5", "type":"CPotentiometer", "name":"pot 5", "pin":5, "debounce":5, "min":10.000000, "max":1010.000000, "PARMS": [{"mode":"normal", "assigned": [{"pkey":"PARM_FENV_RELEASE"},{"pkey":"PARM_PENV_RELEASE"}]}, {"mode":"shift", "assigned": [{"pkey":"PARM_AENV_SUSTAIN"},{"pkey":"PARM_PENV_HOLD"}]}]}, 
+        {"key":"CTRL_POT6", "type":"CPotentiometer", "name":"pot 6", "pin":6, "debounce":5, "min":10.000000, "max":1010.000000, "PARMS": [{"mode":"normal", "assigned": [{"pkey":"PARM_FENV_AMOUNT"},{"pkey":"PARM_PENV_AMOUNT"}]}, {"mode":"shift", "assigned": [{"pkey":"PARM_PENV_ATTACK"}]}]},    
+        {"key":"CTRL_POT_DataA", "type":"CPotentiometer", "name":"pot data a", "pin":7, "debounce":5, "min":10.000000, "max":1010.000000, "PARMS": [{"mode":"normal", "assigned": [{"pkey":"PARM_PLFO_SHAPE"},{"pkey":"PARM_FENV_SUSTAIN"}]}, {"mode":"shift", "assigned": [{"pkey":"PARM_FENV_DECAY"},{"pkey":"PARM_AENV_ATTACK"}]}]}, 
+        {"key":"CTRL_POT_DataB", "type":"CPotentiometer", "name":"pot data b", "pin":32, "debounce":5, "min":10.000000, "max":1010.000000, "PARMS": [{"mode":"normal", "assigned": [{"pkey":"PARM_PENV_SUSTAIN"},{"pkey":"PARM_FENV_RELEASE"},{"pkey":"PARM_PENV_DECAY"}]}, {"mode":"shift", "assigned": [{"pkey":"PARM_AENV_HOLD"}]}]}, 
+        {"key":"CTRL_POT_DataC", "type":"CPotentiometer", "name":"pot data c", "pin":9, "debounce":5, "min":10.000000, "max":1010.000000, "PARMS": [{"mode":"normal", "assigned": [{"pkey":"PARM_AENV_DECAY"}]}, {"mode":"shift", "assigned": [{"pkey":"PARM_FENV_HOLD"},{"pkey":"PARM_FENV_ATTACK"}]}]},         
+        {"key":"CTRL_POT_DataD", "type":"CPotentiometer", "name":"pot data d", "pin":8, "debounce":5, "min":10.000000, "max":1010.000000, "PARMS": [{"mode":"normal", "assigned": [{"pkey":"PARM_FENV_ATTACK"},{"pkey":"PARM_AENV_HOLD"}]}, {"mode":"shift", "assigned": [{"pkey":"PARM_FENV_DECAY"}]}]},         
+        {"key":"CTRL_BTN_DataG", "type":"CButton", "name":"rotary button", "pin":14, "debounce":500, "min":0.000000, "max":1.000000, "state":false, "PARMS": [{"mode":"normal", "assigned": [{"pkey":"CTRL_BTN_DataG"}]}, {"mode":"shift", "assigned": []}]}, 
+        {"key":"CTRL_BTN_VoiceSelect", "type":"CButton", "name":"voice select", "pin":13, "debounce":100, "min":0.000000, "max":1.000000, "state":false, "PARMS": [{"mode":"normal", "assigned": [{"pkey":"CTRL_BTN_VoiceSelect"}]}, {"mode":"shift", "assigned": []}]}, 
+        {"key":"CTRL_BTN_Shift", "type":"CButton", "name":"shift", "pin":22, "debounce":1000, "min":0.000000, "max":1.000000, "state":false, "PARMS": [{"mode":"normal", "assigned": [{"pkey":"CTRL_BTN_Shift"}]}, {"mode":"shift", "assigned": []}]},
+        {"key":"CTRL_BTN_Invert", "type":"CButton", "name":"invert", "pin":23, "debounce":650, "min":0.000000, "max":1.000000, "state":false, "PARMS": [{"mode":"normal", "assigned": [{"pkey":"CTRL_BTN_Invert"}]}, {"mode":"shift", "assigned": []}]}
+    ],
+
+    "PARAMETERS": [                
+        {"key": "CTRL_BTN_DataG", "name": "enter", "value": 0.000000, "min": 0.000000, "max": 1.000000, "taper": 0, "integervalue": true}, 
+        {"key": "CTRL_BTN_Shift", "name": "shift", "value": 0.000000, "min": 0.000000, "max": 1.000000, "taper": 0, "integervalue": true},
+        {"key": "CTRL_BTN_VoiceSelect", "name": "v-sel", "value": 0.000000, "min": 0.000000, "max": 1.000000, "taper": 0, "integervalue": true},
+        {"key": "CTRL_BTN_Invert", "name": "invert", "value": 0.000000, "min": 0.000000, "max": 1.000000, "taper": 0, "integervalue": true}, 
+
+        {"key": "PARM_PENV_ATTACK", "name": "p-atk", "value": 6435.954102, "min": 0.000000, "max": 10000.000000, "taper": 1}, 
+        {"key": "PARM_PENV_HOLD", "name": "p-hld", "value": 2501.230957, "min": 0.000000, "max": 5000.000000, "taper": 1},
+        {"key": "PARM_PENV_DECAY", "name": "p-dec", "value": 2936.958984, "min": 0.000000, "max": 10000.000000, "taper": 1}, 
+        {"key": "PARM_PENV_SUSTAIN", "name": "p-sus", "value": 0.296997, "min": 0.000000, "max": 1.000000, "taper": 0}, 
+        {"key": "PARM_PENV_RELEASE", "name": "p-rel", "value": 2533.042480, "min": 0.000000, "max": 5000.000000, "taper": 1}, 
+        {"key": "PARM_PENV_AMOUNT", "name": "p-lvl", "value": 0.992036, "min": 0.000000, "max": 1.000000, "taper": 0},  
+        {"key": "PARM_PENV_INVERT", "name": "p-inv", "value": 0, "min": 0.000000, "max": 1.000000, "taper": 0},        
+        {"key": "PARM_PLFO_SHAPE", "name": "p-lfo-shape", "value": 0, "min": 0, "max": 12, "taper": 0, "integervalue": true},
+        {"key": "PARM_PLFO_FREQ", "name": "p-lfo-freq", "value": 0, "min": 0.000000, "max": 20.0, "taper": 1},
+        {"key": "PARM_PLFO_AMOUNT", "name": "p-lfo-lvl", "value": 0, "min": 0.000000, "max": 1.000000, "taper": 1},
+        {"key": "PARM_PITCH_BEND", "name": "pitch bend", "value": 0, "min": -1.0, "max": 1.0, "taper": 0},
+
+        {"key": "PARM_AENV_ATTACK", "name": "a-atk", "value": 6627.824219, "min": 0.000000, "max": 10000.000000, "taper": 1}, 
+        {"key": "PARM_AENV_HOLD", "name": "a-hld", "value": 4474.942871, "min": 0.000000, "max": 5000.000000, "taper": 1}, 
+        {"key": "PARM_AENV_DECAY", "name": "a-dec", "value": 4752.566895, "min": 0.000000, "max": 10000.000000, "taper": 1}, 
+        {"key": "PARM_AENV_SUSTAIN", "name": "a-sus", "value": 0.705586, "min": 0.000000, "max": 1.000000, "taper": 0}, 
+        {"key": "PARM_AENV_RELEASE", "name": "a-rel", "value": 3854.467041, "min": 0.000000, "max": 5000.000000, "taper": 1}, 
+        {"key": "PARM_AENV_AMOUNT", "name": "a-lvl", "value": 0.500246, "min": 0.000000, "max": 1.000000, "taper": 0}, 
+        {"key": "PARM_AENV_INVERT", "name": "a-inv", "value": 0, "min": 0.000000, "max": 1.000000, "taper": 0},
+        {"key": "PARM_ALFO_SHAPE", "name": "a-lfo-shape", "value": 0, "min": 0, "max": 12, "taper": 0, "integervalue": true},
+        {"key": "PARM_ALFO_FREQ", "name": "a-lfo-freq", "value": 0, "min": 0.000000, "max": 20.0, "taper": 1},
+        {"key": "PARM_ALFO_AMOUNT", "name": "a-lfo-lvl", "value": 0, "min": 0.000000, "max": 1.000000, "taper": 1},
+        {"key": "PARM_AMP_BEND", "name": "volume pedal", "value": 0, "min": -1.0, "max": 1.0, "taper": 0},
+
+        {"key": "PARM_FENV_ATTACK", "name": "f-atk", "value": 119.930000, "min": 0.000000, "max": 10000.000000, "taper": 1}, 
+        {"key": "PARM_FENV_HOLD", "name": "f-hld", "value": 3527.927979, "min": 0.000000, "max": 5000.000000, "taper": 1}, 
+        {"key": "PARM_FENV_DECAY", "name": "f-dec", "value": 4283.481934, "min": 0.000000, "max": 10000.000000, "taper": 1},         
+        {"key": "PARM_FENV_SUSTAIN", "name": "f-sus", "value": 0.805872, "min": 0.000000, "max": 1.000000, "taper": 0}, 
+        {"key": "PARM_FENV_RELEASE", "name": "f-rel", "value": 1468.479492, "min": 0.000000, "max": 5000.000000, "taper": 1}, 
+        {"key": "PARM_FENV_AMOUNT", "name": "f-lvl", "value": 0.296997, "min": 0.000000, "max": 1.000000, "taper": 0},
+        {"key": "PARM_FENV_INVERT", "name": "f-inv", "value": 0, "min": 0.000000, "max": 1.000000, "taper": 0},
+        {"key": "PARM_FLFO_SHAPE", "name": "f-lfo-shape", "value": 0, "min": 0, "max": 12, "taper": 0, "integervalue": true},
+        {"key": "PARM_FLFO_FREQ", "name": "f-lfo-freq", "value": 0, "min": 0.000000, "max": 20.0, "taper": 1},
+        {"key": "PARM_FLFO_AMOUNT", "name": "f-lfo-lvl", "value": 0, "min": 0.000000, "max": 1.000000, "taper": 1},
+        {"key": "PARM_FILTER_BEND", "name": "filter bend", "value": 0, "min": -1.0, "max": 1.0, "taper": 0},
+
+        {"key": "PARM_VOICE_GAIN0", "name": "voice0 gain", "value": 1.0, "min": 0.0, "max": 1.5, "taper": 0, "integervalue": false},
+        {"key": "PARM_VOICE_GAIN1", "name": "voice1 gain", "value": 1.0, "min": 0.0, "max": 1.5, "taper": 0, "integervalue": false},
+        {"key": "PARM_VOICE_GAIN2", "name": "voice2 gain", "value": 1.0, "min": 0.0, "max": 1.5, "taper": 0, "integervalue": false},
+        {"key": "PARM_VOICE_GAIN3", "name": "voice3 gain", "value": 1.0, "min": 0.0, "max": 1.5, "taper": 0, "integervalue": false},
+        {"key": "PARM_VOICE_PAN0", "name": "voice0 pan", "value": 0.5, "min": 0.0, "max": 1.0, "taper": 0, "integervalue": false},
+        {"key": "PARM_VOICE_PAN1", "name": "voice1 pan", "value": 0.5, "min": 0.0, "max": 1.0, "taper": 0, "integervalue": false},
+        {"key": "PARM_VOICE_PAN2", "name": "voice2 pan", "value": 0.5, "min": 0.0, "max": 1.0, "taper": 0, "integervalue": false},
+        {"key": "PARM_VOICE_PAN3", "name": "voice3 pan", "value": 0.5, "min": 0.0, "max": 1.0, "taper": 0, "integervalue": false},
+        {"key": "PARM_MASTER_GAIN", "name": "master gain", "value": 0.85, "min": 0.0, "max": 1.5, "taper": 0, "integervalue": false},
+        {"key": "PARM_MASTER_PAN", "name": "master pan", "value": 0.5, "min": 0.0, "max": 1.0, "taper": 0, "integervalue": false},
+
+        {"key":"PARM_PWM_A_SHAPE", "name": "PWM shape a", "value": 0, "min": 0, "max": 11, "taper": 0, "integervalue": true},
+        {"key":"PARM_PWM_A_FREQ", "name": "PWM freq a", "value": 0, "min": 0, "max": 13289.75, "taper": 0, "integervalue": false},
+        {"key":"PARM_PWM_A_GAIN", "name": "PWM lvl", "value": 0.0, "min": 0.0, "max": 1.2, "taper": 0, "integervalue": false},
+        {"key":"PARM_PWM_B_SHAPE", "name": "PWM shape a", "value": 0, "min": 0, "max": 11, "taper": 0, "integervalue": true},
+        {"key":"PARM_PWM_B_FREQ", "name": "PWM freq b", "value": 0, "min": 0, "max": 13289.75, "taper": 0, "integervalue": false},
+        {"key":"PARM_PWM_B_GAIN", "name": "PWM lvl", "value": 0.0, "min": 0.0, "max": 1.2, "taper": 0, "integervalue": false},
+
+        {"key":"PARM_DCO_A_AMP", "name": "Osc A amp", "value":1.0, "min":0.0, "max":1.0, "taper":0, "integervalue":false},
+        {"key":"PARM_DCO_A_FREQ", "name": "Osc A freq", "value":0.0, "min":0.0, "max":13289.75, "taper":0, "integervalue":false},
+        {"key":"PARM_DCO_A_SHAPE", "name": "Osc A shape", "value": 0, "min": 0, "max": 11, "taper": 0, "integervalue": true},
+        {"key":"PARM_DCO_A_DETUNE", "name": "Osc A detune", "value": 0.0, "min": 0.0, "max": 1.0, "taper": 0, "integervalue": false},
+        {"key":"PARM_DCO_B_AMP", "name": "Osc B amp", "value":1.0, "min":0.0, "max":1.0, "taper":0, "integervalue":false},
+        {"key":"PARM_DCO_B_FREQ", "name": "Osc B freq", "value":0.0, "min":0.0, "max":13289.75, "taper":0, "integervalue":false},
+        {"key":"PARM_DCO_B_SHAPE", "name": "Osc B shape", "value": 0, "min": 0, "max": 11, "taper": 0, "integervalue": true},
+        {"key":"PARM_DCO_B_DETUNE", "name": "Osc B detune", "value": 0.0, "min": 0.0, "max": 1.0, "taper": 0, "integervalue": false},
+
+        {"key":"PARM_XMOD_AMOUNT", "name": "X-Mod", "value":0.0, "min":0.0, "max":1.0, "taper":0, "integervalue":false},
+
+        {"key":"PARM_RING_LEVEL", "name": "ring-level", "value":0.0, "min":0.0, "max":1.0, "taper":0, "integervalue":false},
+        {"key":"PARM_RING_FREQ", "name": "ring-freq",  "value": 0, "min": 0, "max": 13289.75, "taper": 0, "integervalue": false},
+        {"key":"PARM_RING_SHAPE", "name": "ring-shape", "value": 0, "min": 0, "max": 11, "taper": 0, "integervalue": true},
+
+        {"key":"PARM_NOISE_LEVEL", "name": "noise level", "value":0.0, "min":0.0, "max":1.0, "taper":0, "integervalue":false},
+        {"key":"PARM_NOISE_TYPE", "name": "noise colour", "value":0.0, "min":0.0, "max":1.0, "taper":0, "integervalue":true},
+        
+        {"key":"PARM_PAN_AB", "name": "mix part a/b", "value":0.5, "min":0.0, "max":1.0, "taper":0, "integervalue":false},
+        
+        {"key":"PARM_SHAPER_PREGAIN", "name": "shaper pre-gain", "value":1.0, "min":0.0, "max":1.5, "taper":0, "integervalue":false},
+        {"key":"PARM_SHAPER_SHAPE", "name": "shaper curve", "value":0.0, "min":0.0, "max":29.0, "taper":0, "integervalue":true},
+        {"key":"PARM_SHAPER_BYPASS", "name": "shaper bypass", "value":0.0, "min":0.0, "max":1.0, "taper":0, "integervalue":true},
+
+        {"key":"PARM_FILTER_RES", "name": "filter resonance", "value":0.7, "min":0.7, "max":5.0, "taper":0, "integervalue":false},
+        {"key":"PARM_FILTER_FREQ", "name": "filter freq", "value":0.0, "min":0.0, "max":13289.75, "taper":0, "integervalue":false},
+        {"key":"PARM_FILTER_OCTAVES", "name": "filter octaves", "value":0.0, "min":0.0, "max":7.0, "taper":0, "integervalue":false},
+        {"key":"PARM_FILTER_TYPE", "name": "filter select", "value":0.0, "min":0.0, "max":3.0, "taper":0, "integervalue":true},
+        {"key":"PARM_FILTER_POSTGAIN", "name": "filter select", "value":1.0, "min":0.0, "max":1.2, "taper":0, "integervalue":false}                    
+    ]
+}

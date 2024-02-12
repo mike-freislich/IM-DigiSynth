@@ -31,11 +31,13 @@ class SimpleTimer
 {
 public:
   SimpleTimer() {}
-  SimpleTimer(uint32_t duration) : duration(duration){};
+  SimpleTimer(uint32_t duration) : _duration(duration){};
+
+  void start() { reset(); }
   bool update()
   {
     uint32_t now = millis();
-    if (now > last + duration)
+    if (now > last + _duration)
     {
       last = now;
       return true;
@@ -43,10 +45,10 @@ public:
     return false;
   }
   void reset() { last = millis(); }
-  void setDuration(uint32_t duration) { this->duration = duration; }
+  void duration(uint32_t duration) { this->_duration = duration; }
 
 private:
-  uint32_t duration = 0;
+  uint32_t _duration = 0;
   uint32_t last = 0;
 };
 

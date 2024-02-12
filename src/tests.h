@@ -1,7 +1,7 @@
 #ifndef PS_TESTS_H
 #define PS_TESTS_H
 
-//#define RUNTESTS
+#define RUNTESTS
 
 #ifdef RUNTESTS
 
@@ -16,6 +16,7 @@ bool testAudioStream();
 bool testAudioComponent();
 void testIO();
 void testLED_loop();
+void testmap();
 
 FLASHMEM void runTests()
 {
@@ -24,7 +25,9 @@ FLASHMEM void runTests()
     // testSDCard();
     // testAudioStream();
     // testAudioComponent();
-    testIO();
+    // testIO();
+
+    testmap();
 }
 
 class ACEnvelope : public PSComponent
@@ -175,7 +178,7 @@ uint8_t testLights[] = {4, 20, 21, 22, 23};
 FLASHMEM void testIO()
 {
     Serial.println("*************** testing IO ***************");
-    digitalIO.setup();    
+    digitalIO.setup();
     digitalIO.setDebounceTime(30);
     digitalIO.begin();
     ftimer.setDuration(500);
@@ -198,3 +201,14 @@ FLASHMEM void testIO()
 #endif
 
 #endif
+
+#include "PSObjectCollection.h"
+
+void testmap()
+{
+    PSObjectCollection collection;
+    collection.addItem(new PSObject(PSK::CTRL_BTN_Shift, "shift button"));
+
+    //collection.getItem()
+
+}

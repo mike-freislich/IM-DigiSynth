@@ -1,5 +1,4 @@
-#ifndef ANALOG_MUX_H
-#define ANALOG_MUX_H
+#pragma once
 #include <Arduino.h>
 
 #define MUXA_COM A0
@@ -98,5 +97,3 @@ private:
 //         Serial.println();
 //     }
 // }
-
-#endif
