@@ -1,14 +1,19 @@
-#include <Arduino.h>
-#include "Compat.h"
-#include "init.h"
+#include "ArduinoStub.h"
+#include "LXSynth.h"
 
-FLASHMEM void setup()
+LXSynth synth;
+
+void setup()
 {
-    initParameters();
-    initModules();
+       
 }
 
-FLASHMEM void loop()
+void loop()
 {
-    Modules.update();
+    synth.update();
+}   
+
+void exiting()
+{
 }
+
