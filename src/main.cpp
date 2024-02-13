@@ -5,7 +5,6 @@ LXSynth synth;
 
 void setup()
 {
-       
 }
 
 void loop()

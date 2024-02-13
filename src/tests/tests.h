@@ -1,7 +1,7 @@
 #ifndef PS_TESTS_H
 #define PS_TESTS_H
 
-#define RUNTESTS
+//#define RUNTESTS
 
 #ifdef RUNTESTS
 
