@@ -1,5 +1,4 @@
 #pragma once
-#include <Arduino.h>
 
 #define MUXA_COM A0
 #define MUXB_COM A1

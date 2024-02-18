@@ -1,7 +1,5 @@
-#ifndef CONTROL_PINS_H
-#define CONTROL_PINS_H
-
-#include <Arduino.h>
+#pragma once
+//#include <Arduino.h>
 
 #pragma region MUX POTS
 
@@ -50,14 +48,9 @@ const uint8_t PROGMEM buttonPinsActive[] = {BTN_Shift, BTN_ROTARY1, 16, 17, 18, 
 // LIGHTS
 const uint8_t PROGMEM ledPinsActive[] = {20,21,22,23}; //, BTN_V1_EnvSelect, BTN_V1_NoiseType};
 
-
 #pragma endregion
 
 // ENCODERS
 #define NUMENCODERS 1
 #define PIN_ENC1_A A7
 #define PIN_ENC1_B A6
-//#define PIN_ENC2_A A8
-//#define PIN_ENC2_B A9
-
-#endif

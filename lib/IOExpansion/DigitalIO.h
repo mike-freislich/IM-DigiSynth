@@ -1,10 +1,8 @@
-#ifndef DIGITAL_IO_H
-#define DIGITAL_IO_H
-
-#include <SimpleTimer.h>
+#pragma once
 #include <PCF8575.h>
 #include <vector>
-#include <controlPins.h>
+#include "ControlPins.h"
+#include "timing.h"
 
 #define PCF_ISR_PIN 2
 #define PCF_ADDR0 0x20
@@ -23,7 +21,7 @@ public:
     DigitalIO() {}
     ~DigitalIO() {}
 
-    void setup()
+    void init()
     {
         Serial.println("initialising Digital IO");
         Wire.begin();
@@ -34,7 +32,7 @@ public:
                 this->addBus(PCF_ADDR3)))
         {
             Serial.println(F("Error: Digital IO Bus Expansion failed to inititalise "));
-            printf("Usable busses %d and pins %d\n", this->busCount(), this->pinCount());
+            Serial.printf("Usable busses %d and pins %d\n", this->busCount(), this->pinCount());
         }
         this->findAddress();
         this->setDebounceTime(30);
@@ -99,7 +97,7 @@ public:
         (pinMode) ? bitSet(mask, channel) : bitClear(mask, channel);
         b->setButtonMask(mask);    
         
-        printf("setting output [pin %d] buttonMask [bus %d] = %s\n", channel, bus, binary16(b->getButtonMask()).c_str());
+        Serial.printf("setting output [pin %d] buttonMask [bus %d] = %s\n", channel, bus, binary16(b->getButtonMask()).c_str());
     }
 
     bool addBus(uint8_t addr, uint16_t buttonMask = word(B00000000, B11110000))
@@ -124,6 +122,9 @@ public:
         return false;
     }
 
+    /// @brief reads the state of a pin directly from hardware
+    /// @param gpioId the id of the pin to query
+    /// @return the state
     uint8_t digitalReadIO(uint8_t gpioId)
     {
         if (this->bus.size() > 0)
@@ -135,6 +136,9 @@ public:
         return 0;
     }
 
+    /// @brief for output pins, sets the state of the pin to on or off
+    /// @param gpioId the id of the pin to change state
+    /// @param on the state to set
     void digitalWriteIO(uint8_t gpioId, bool on)
     {
         uint8_t bus = 0, channel = 0;
@@ -149,6 +153,9 @@ public:
         }
     }
 
+    /// @brief reads the last stored state of the GPIO pin
+    /// @param gpioId the id of the pin to read from
+    /// @return whether the pin is set or not
     bool pinState(uint8_t gpioId)
     {
         uint8_t bus = 0, channel = 0;
@@ -167,7 +174,7 @@ public:
         return false;
     }
 
-    void setDebounceTime(uint32_t debounceMs) { debounceTimer.setDuration(debounceMs); }
+    void setDebounceTime(uint32_t debounceMs) { debounceTimer.duration(debounceMs); }
 
     void findAddress()
     {
@@ -273,5 +280,3 @@ private:
 //     digitalIO.update();
 //     digitalIO.pinState(0);
 // }
-
-#endif
