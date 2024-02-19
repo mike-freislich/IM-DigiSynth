@@ -3,35 +3,35 @@
 
 #pragma region MUX POTS
 
-// envelope board (v1)
-#define POT_V1_Fader1 0
-#define POT_V1_Fader2 1
-#define POT_V1_Fader3 2
-#define POT_V1_Fader4 3
-#define POT_V1_EnvLevel 4
-#define POT_V1_Cutoff 5
-#define POT_V1_Resonance 6
+// // envelope board (v1)
+// #define POT_V1_Fader1 0
+// #define POT_V1_Fader2 1
+// #define POT_V1_Fader3 2
+// #define POT_V1_Fader4 3
+// #define POT_V1_EnvLevel 4
+// #define POT_V1_Cutoff 5
+// #define POT_V1_Resonance 6
 
-// vco board (v1)
-#define POT_V1_Waveform 7
-#define POT_V1_PulseWidth 8
-#define POT_V1_Tune 9
-#define POT_V1_Mix 10
-#define POT_V1_RingLevel 11
-#define POT_V1_RingFreq 12
-#define POT_V1_NoiseLevel 13
-#define POT_V1_Pan 14
-#define POT_V1_ShaperWave 15
-#define POT_V1_ShaperCurve 16
-#define POT_V1_XmodSend 17
+// // vco board (v1)
+// #define POT_V1_Waveform 7
+// #define POT_V1_PulseWidth 8
+// #define POT_V1_Tune 9
+// #define POT_V1_Mix 10
+// #define POT_V1_RingLevel 11
+// #define POT_V1_RingFreq 12
+// #define POT_V1_NoiseLevel 13
+// #define POT_V1_Pan 14
+// #define POT_V1_ShaperWave 15
+// #define POT_V1_ShaperCurve 16
+// #define POT_V1_XmodSend 17
 
-// display board : data pots
-#define POT_Data1 18
-#define POT_Data2 19
-#define POT_Data3 20
-#define POT_Data4 21
+// // display board : data pots
+// #define POT_Data1 18
+// #define POT_Data2 19
+// #define POT_Data3 20
+// #define POT_Data4 21
 
-const uint8_t PROGMEM potPinsActive[] = {0,1,2,3, 32,33,34, 36,37,38,39};
+// const uint8_t PROGMEM potPinsActive[] = {0,1,2,3, 32,33,34, 36,37,38,39};
 
 #pragma endregion
 

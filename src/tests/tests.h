@@ -18,7 +18,7 @@ void testIO();
 void testLED_loop();
 void testmap();
 
-FLASHMEM void runTests()
+void runTests()
 {
     Serial.println("*************** RUNNING TESTS *************** ");
     // testComponents();
@@ -36,7 +36,7 @@ public:
     ACEnvelope(String name = "ACEnvelope") : PSComponent(name) {}
 };
 
-FLASHMEM bool testAudioComponent()
+bool testAudioComponent()
 {
     ACEnvelope ace;
     PSParameter *attack = ace.addParameter("Attack", 50, 0, 1000, &filter1env, [](AudioStream *audioStream, float value)
@@ -75,7 +75,7 @@ private:
     float value;
 };
 
-FLASHMEM bool testAudioStream()
+bool testAudioStream()
 {
     Foo foo(&filter1env, 99.1, [](AudioStream *audioStream, float value)
             { ((AudioEffectEnvelope *)audioStream)->attack(value); });
@@ -85,7 +85,7 @@ FLASHMEM bool testAudioStream()
     return true;
 }
 
-FLASHMEM bool savePatch(const char *filename, String data)
+bool savePatch(const char *filename, String data)
 {
 
     if (SD.exists(filename))
@@ -106,7 +106,7 @@ FLASHMEM bool savePatch(const char *filename, String data)
     return false;
 }
 
-FLASHMEM String loadPatch(const char *filename)
+String loadPatch(const char *filename)
 {
     if (SD.exists(filename))
     {
@@ -121,7 +121,7 @@ FLASHMEM String loadPatch(const char *filename)
     return "";
 }
 
-FLASHMEM void testSDCard()
+void testSDCard()
 {
     Serial.println("BEGIN TEST : SD CARD -------------------------");
     SD.begin(BUILTIN_SDCARD);
@@ -137,7 +137,7 @@ FLASHMEM void testSDCard()
     printf("usedSize %llu\n", SD.usedSize());
 }
 
-FLASHMEM void testComponents()
+void testComponents()
 {
     delay(1000);
     Serial.println("BEGIN TEST : COMPONENTS -------------------------");
@@ -175,7 +175,7 @@ FLASHMEM void testComponents()
 SimpleTimer ftimer;
 int lightIndex = 0;
 uint8_t testLights[] = {4, 20, 21, 22, 23};
-FLASHMEM void testIO()
+void testIO()
 {
     Serial.println("*************** testing IO ***************");
     digitalIO.setup();

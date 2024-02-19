@@ -40,6 +40,7 @@ public:
 
 void initMidi()
 {
+    LOG("[INIT] Midi");
     usbMIDI.setHandleClock(myClock);
     usbMIDI.setHandleNoteOn(myNoteOn);
     usbMIDI.setHandleNoteOff(myNoteOff);
