@@ -1,5 +1,5 @@
 
-#define DEBUG
+//#define DEBUG
 #include "DebugLog.h"
 
 #include "ArduinoStub.h"
@@ -26,7 +26,7 @@ void setup()
     Modules.module<LXOscillator>(ItemType::TLXOscillator, ModKeys::OscillatorA)->begin();
     Modules.module<LXOscillator>(ItemType::TLXOscillator, ModKeys::OscillatorB)->begin();
     synth.noteOn(0, 64, 127);
-    serialLogTimer.start(1000);
+    serialLogTimer.start(10000);
 }
 
 void loop()
