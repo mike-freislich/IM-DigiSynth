@@ -34,13 +34,6 @@ int note = 0;
 bool didSet = false;
 void loop()
 {    
-    // if (noteTimer.update())
-    // {   
-    //     synth.noteOff(0, 0, 0);
-    //     synth.noteOn(0, note+36, 127);
-    //     note = (note + 1) % 24;        
-    // }
-
     synth.update();
     if (serialLogTimer.update())
         onSerialLogTimer();
