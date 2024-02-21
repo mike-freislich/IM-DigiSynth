@@ -1,5 +1,6 @@
 #pragma once
 #include <usb_midi.h>
+#include "MidiTables.h"
 
 void myNoteOn(byte channel, byte note, byte velocity);
 void myNoteOff(byte channel, byte note, byte velocity);
