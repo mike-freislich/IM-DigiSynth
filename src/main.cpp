@@ -1,5 +1,4 @@
-
-// #define DEBUG
+#define DEBUG
 #include "DebugLog.h"
 
 #include "ArduinoStub.h"
@@ -12,11 +11,16 @@
 #include "mem.h"
 
 void onSerialLogTimer();
-SimpleTimer serialLogTimer;
-SimpleTimer noteTimer;
+SimpleTimer serialLogTimer(10000);
+SimpleTimer noteTimer(150);
+SimpleTimer loopDelayTimer(10);
 
-void setup()
+FLASHMEM void setup()
 {
+#ifdef TEENSY_OPT_SMALLEST_CODE
+    asm(".global _printf_float");
+#endif
+
 #ifdef BUILD_FOR_TEENSY
     Serial.begin(115200);
     delay(2000);
@@ -26,27 +30,24 @@ void setup()
     synth.init();
     Modules.module<LXOscillator>(ItemType::TLXOscillator, ModKeys::OscillatorA)->begin();
     Modules.module<LXOscillator>(ItemType::TLXOscillator, ModKeys::OscillatorB)->begin();
-    serialLogTimer.start(10000);
-    noteTimer.start(150);    
+    serialLogTimer.start();
+    noteTimer.start();
+    loopDelayTimer.start();
 }
 
-int note = 0;
-bool didSet = false;
 void loop()
-{    
+{
     synth.update();
     if (serialLogTimer.update())
-        onSerialLogTimer();
-    delay(1);
-}
-
-void exiting()
-{
+         onSerialLogTimer();
+    
+    while (!loopDelayTimer.update())
+        yield();
 }
 
 extern float tempmonGetTemp(void);
 
-void onSerialLogTimer()
+FLASHMEM void onSerialLogTimer()
 {
 #ifdef BUILD_FOR_TEENSY
     simpleMemInfo();

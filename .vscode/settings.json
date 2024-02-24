@@ -56,5 +56,6 @@
         "sstream": "cpp",
         "stop_token": "cpp",
         "thread": "cpp"
-    }
+    },
+    "C_Cpp.default.cppStandard": "gnu++17"
 }
