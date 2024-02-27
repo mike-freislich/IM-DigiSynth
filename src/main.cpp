@@ -1,4 +1,5 @@
-#define DEBUG
+// #define DEBUG
+#define TESTSYNTH
 #include "DebugLog.h"
 
 #include "ArduinoStub.h"
@@ -7,13 +8,19 @@
 #include <SD.h>
 #include <SPI.h>
 #include <SerialFlash.h>
-#include "LXSynth.h"
 #include "mem.h"
+#include "timing.h"
+
+#ifdef TESTSYNTH
+#include "LXTestSynth.h"
+#else
+#include "LXSynth.h"
+#endif
 
 void onSerialLogTimer();
 SimpleTimer serialLogTimer(10000);
 SimpleTimer noteTimer(150);
-SimpleTimer loopDelayTimer(10);
+SimpleTimer loopDelayTimer(2);
 
 FLASHMEM void setup()
 {
@@ -27,9 +34,13 @@ FLASHMEM void setup()
 #endif
 
     LOG("starting synth");
+
+#ifdef TESTSYNTH
+    testSynth.init();
+#else
     synth.init();
-    Modules.module<LXOscillator>(ItemType::TLXOscillator, ModKeys::OscillatorA)->begin();
-    Modules.module<LXOscillator>(ItemType::TLXOscillator, ModKeys::OscillatorB)->begin();
+#endif
+
     serialLogTimer.start();
     noteTimer.start();
     loopDelayTimer.start();
@@ -37,10 +48,15 @@ FLASHMEM void setup()
 
 void loop()
 {
+#ifdef TESTSYNTH
+    testSynth.update();
+#else
     synth.update();
+#endif
+
     if (serialLogTimer.update())
-         onSerialLogTimer();
-    
+        onSerialLogTimer();
+
     while (!loopDelayTimer.update())
         yield();
 }
